@@ -11,3 +11,9 @@ SHUFFLE = True #enable data augmentation option by randomly selecting the order 
 CYCLE = 3 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
 
 COULOMB_DIAGONAL = False # parameter specifying whether values on the diagonal for a coulomb matrix should be displayed
+
+#training parameters
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODEL = models.resnet18(pretrained=False)
+LEARNING_RATE = 0.0003
+EPOCHS = 16
