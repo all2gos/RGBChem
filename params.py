@@ -1,3 +1,6 @@
+import torch
+from torchvision import models 
+
 MATRIX_SIZE = 32
 PATH = '' #your path to the working directory
 DB = 'qm7' #or qm7
