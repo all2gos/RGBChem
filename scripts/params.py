@@ -2,11 +2,11 @@ import torch
 from torchvision import models 
 
 #--- OVERALL PARAMETERS---#
-PATH = '' #your path to the working directory
+PATH = '.' #your path to the working directory
 PREDICTED_VALUE = 'HOMO-LUMO Gap' #or 'Energy of HOMO', 'Energy of LUMO' or any other available properties
 
 #---DATABASE PARAMETERS---#
-DB = 'qm7' #name of your .csv database
+DB = 'qm7_demo' #name of your .csv database
 SAMPLE = 1 #the fraction of data from the dataset to be used for training
 SHUFFLE = True #enable data augmentation option by randomly selecting the order of coordinate atoms in a molecule, used only when creating a database and not images
 CYCLE = 3 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
@@ -23,3 +23,5 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL = models.resnet18(pretrained=False)
 LEARNING_RATE = 0.0003
 EPOCHS = 16
+TRAIN_TEST_SPLIT = 0.8 
+BATCH_SIZE = 2
