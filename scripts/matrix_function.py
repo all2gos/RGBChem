@@ -23,28 +23,19 @@ def distance(coordinates, n_atoms):
 
 def bond_order(mat, atom_type, bo):
     n = len(atom_type)
-
     for i in range(n):
         for j in range(n):
             if i!=j:
                 pair = f'{atom_type[i]}{atom_type[j]}'
 
-                rpipi = bo[pair][8]
-                rpi = bo[pair][7]
-                rsigma = bo[pair][6]
-                pbo6 = bo[pair][5]
-                pbo5 = bo[pair][4]
-                pbo4 = bo[pair][3]
-                pbo3 = bo[pair][2]
-                pbo2 = bo[pair][1]
-                pbo1 = bo[pair][0]
+                pbo1, pbo2, pbo3, pbo4, pbo5, pbo6, rsigma, rpi, rpipi = bo[pair]
 
                 BO_sigma = np.exp(pbo1*(mat[i][j]/rsigma)**pbo2) if rsigma != float(-1) else 0
                 BO_pi = np.exp(pbo3*(mat[i][j]/rpi)**pbo4) if rpi != float(-1) else 0
                 BO_pipi = np.exp(pbo5*(mat[i][j]/rpipi)**pbo6) if rpipi != float(-1) else 0
 
                 mat[i][j] = BO_sigma+BO_pi+BO_pipi
-                if mat[i][j] >5:
+                if mat[i][j] >5: #to track bugs and unusual cases
                     print(i,j, atom_type[i], atom_type[j], BO_pi, rpi, pbo3, pbo4)
 
     return mat
