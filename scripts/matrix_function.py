@@ -49,10 +49,8 @@ def coulomb_matrix(coordinates, n_atoms, atom_type, diagonal = True):
     for i in range(n_atoms):
         for j in range(n_atoms):
             if i==j:
-                if diagonal == True:
-                    c_mat[i][i] = 0.5*Z[atom_type[i]]**2.4
-                else:
-                    c_mat[i][i] = 0
+                c_mat[i][i] = 0.5*Z[atom_type[i]]**2.4 if diagonal == True else 0
+
             else:
                 cord_i = np.array(np.char.replace(coordinates[i], '*^', 'e')).astype(float)
                 cord_j = np.array(np.char.replace(coordinates[j], '*^', 'e')).astype(float)
