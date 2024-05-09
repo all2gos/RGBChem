@@ -6,7 +6,7 @@ import os
 from reax_ff_data import bo
 from .matrix_function import *
 from .params import *
-from .utils import making_rgb_numerically
+from .utils import making_rgb_numerically, creating_images
 from torch.utils.data import DataLoader, TensorDataset
 
 def dataloader_ffn():
@@ -38,3 +38,11 @@ def dataloader_ffn():
     val_loader = create_dataloader(X_test, y_test)
 
     return train_loader, val_loader
+
+
+def dataloader_conv():
+    raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
+    creating_images(0, len(raw_data)-1, bo, raw_data)
+
+
+    
