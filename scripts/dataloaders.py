@@ -39,10 +39,44 @@ def dataloader_ffn():
 
     return train_loader, val_loader
 
+from torchvision.datasets import ImageFolder
+from torchvision import transforms
+from PIL import Image
 
+class CustomDataset(torch.utils.data.Dataset):
+    def __init__(self, transform=None):
+        self.transform = transform
+        name = f'{DB}.csv'
+        self.df = pd.read_csv(os.path.join(PATH, name))
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        img_name = f"{self.df['ID'].iloc[idx]}.png"
+        try: 
+            image = Image.open(f'{TRAIN_DIR_NAME}/{img_name}').convert('RGB') 
+
+        except FileNotFoundError:
+            image = Image.open(f'{TEST_DIR_NAME}/{img_name}').convert('RGB')
+
+        label = self.df[PREDICTED_VALUE].iloc[idx]
+        if self.transform:
+            image = self.transform(image)
+        return image, label
+     
 def dataloader_conv():
     raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
     creating_images(0, len(raw_data)-1, bo, raw_data)
 
+    train_transforms = transforms.Compose([transforms.ToTensor()])
+    train_dataset = CustomDataset(transform=train_transforms)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    
+    val_dataset = CustomDataset(transform=train_transforms)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
+
+
+    return train_loader, val_loader
+
+
