@@ -149,6 +149,7 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
     for chem in range(start, end+1, step):
         if random.randint(1,int(1/split)) == int(1/split):
             making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label = TEST_DIR_NAME)
+            print(ds.ID.iloc[chem])
             print(f"{chem} goes to test set")
         else:
 
