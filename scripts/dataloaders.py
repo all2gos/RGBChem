@@ -65,9 +65,10 @@ class CustomDataset(torch.utils.data.Dataset):
             image = self.transform(image)
         return image, label
      
-def dataloader_conv():
+def dataloader_conv(n = 0):
     raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
-    creating_images(0, len(raw_data)-1, bo, raw_data)
+    if n ==0: n=len(raw_data) -1
+    creating_images(0, n, bo, raw_data)
 
     train_transforms = transforms.Compose([transforms.ToTensor()])
     train_dataset = CustomDataset(transform=train_transforms)
