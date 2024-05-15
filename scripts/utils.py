@@ -143,13 +143,14 @@ def making_rgb(mat, id, label):
 
 def creating_images(start, end, bo, ds, split=0.1, step=1):
     ''' A function that is an automation of the making_rgb function '''
+
+    print(f'Creating {end-start+1} images for training model')
     os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
     os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok = True)
 
     for chem in range(start, end+1, step):
         if random.randint(1,int(1/split)) == int(1/split):
             making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label = TEST_DIR_NAME)
-            print(ds.ID.iloc[chem])
             print(f"{chem} goes to test set")
         else:
 
