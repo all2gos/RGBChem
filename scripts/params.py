@@ -20,8 +20,8 @@ COULOMB_DIAGONAL = False # parameter specifying whether values on the diagonal f
 
 #---TRAINING PROCESS PARAMETERS---#
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL = models.resnet18(pretrained=False)
 LEARNING_RATE = 0.0003
-EPOCHS = 16
+MOMENTUM = 0.8
+EPOCHS = 64
 TRAIN_TEST_SPLIT = 0.8 
-BATCH_SIZE = 2
+BATCH_SIZE = 32
