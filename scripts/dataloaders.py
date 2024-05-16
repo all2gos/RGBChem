@@ -63,9 +63,11 @@ class CustomDataset(torch.utils.data.Dataset):
         label = self.df[PREDICTED_VALUE].iloc[idx]
         label = torch.tensor(label, dtype=torch.float32).to(DEVICE)
 
-        image = image.to(DEVICE)
         if self.transform:
             image = self.transform(image)
+            
+        image = image.to(DEVICE)    
+
         return image, label
      
 def dataloader_conv(n = 0):
