@@ -71,10 +71,10 @@ def dataloader_conv(n = 0):
     creating_images(0, n, bo, raw_data)
 
     train_transforms = transforms.Compose([transforms.ToTensor()])
-    train_dataset = CustomDataset(transform=train_transforms)
+    train_dataset = CustomDataset(transform=train_transforms).to(DEVICE)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    val_dataset = CustomDataset(transform=train_transforms)
+    val_dataset = CustomDataset(transform=train_transforms).to(DEVICE)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 
