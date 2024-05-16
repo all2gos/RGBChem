@@ -37,7 +37,7 @@ def dataloader_ffn():
     train_loader = create_dataloader(X_train, y_train)
     val_loader = create_dataloader(X_test, y_test)
 
-    return train_loader, val_loader
+    return train_loader.to(DEVICE), val_loader.to(DEVICE)
 
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
@@ -78,6 +78,6 @@ def dataloader_conv(n = 0):
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 
-    return train_loader, val_loader
+    return train_loader.to(DEVICE), val_loader.to(DEVICE)
 
 
