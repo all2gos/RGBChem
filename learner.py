@@ -14,6 +14,7 @@ def learner(dl, model):
 
     losses = []
     accuracies = []
+    model = model.to(DEVICE)
 
     for e in range(EPOCHS):
         model.train()
@@ -21,7 +22,7 @@ def learner(dl, model):
 
         for inputs, targets in dl[0]:
             optimizer.zero_grad()
-            outputs = model(inputs).to(torch.float32)
+            outputs = model(inputs)
             loss = criterion(outputs.t().view(-1), targets.to(torch.float32))
             loss.backward()
             optimizer.step()
