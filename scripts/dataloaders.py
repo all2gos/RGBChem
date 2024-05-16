@@ -45,7 +45,7 @@ from PIL import Image
 
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, transform=None):
-        self.transform = transform.to(DEVICE) if transform else None
+        self.transform = transform
         name = f'{DB}.csv'
         self.df = pd.read_csv(os.path.join(PATH, name))
 
@@ -61,6 +61,9 @@ class CustomDataset(torch.utils.data.Dataset):
             image = Image.open(f'{TEST_DIR_NAME}/{img_name}').convert('RGB')
 
         label = self.df[PREDICTED_VALUE].iloc[idx]
+        label = torch.tensor(label, dtype=torch.float32).to(DEVICE)
+
+        image = image.to(DEVICE)
         if self.transform:
             image = self.transform(image)
         return image, label
