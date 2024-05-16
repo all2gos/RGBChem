@@ -15,7 +15,6 @@ def learner(dl, model):
     losses = []
     accuracies = []
 
-    dl = [data.to(DEVICE) for data in dl]
     for e in range(EPOCHS):
         model.train()
         running_loss = 0.0
