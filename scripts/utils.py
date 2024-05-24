@@ -10,12 +10,16 @@ from reax_ff_data import bo
 
 
 #does not work well, in effect making_df does not work well either
-try:
-    files = os.listdir(f'{PATH}/data')
-except FileNotFoundError:
-    os.system('mkdir data')
-    os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
-    files = os.listdir(f'{PATH}/data')
+
+def get_list_of_files():
+    try:
+        files = os.listdir(f'{PATH}/data')
+    except FileNotFoundError:
+        os.system('mkdir data')
+        os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
+        files = os.listdir(f'{PATH}/data')
+    
+    return files
 
 def extracting(f, shuffle = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
@@ -34,11 +38,13 @@ def extracting(f, shuffle = SHUFFLE):
     df_record.update(zip(labels, properties))
 
     #coordinates 
+
+    atom_type, cords, mulliken = [],[],[]
     for atom in range(df_record['n_atoms']):
         atom_record = lines[2+atom].replace('\n','').split('\t')
-        df_record['atom_type'].append(atom_record[0])
-        df_record['cords'].append(atom_record[1:-1])
-        df_record['mulliken'].append(atom_record[-1])
+        atom_type.append(atom_record[0])
+        cords.append(atom_record[1:-1])
+        mulliken.append(atom_record[-1])
 
     '''If shuffle = True then the order of atoms in the molecule is randomized'''
     if shuffle == True:
@@ -54,9 +60,13 @@ def extracting(f, shuffle = SHUFFLE):
 
     return df_record
 
-def making_df(l=len(files), cycle=CYCLE):
+def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     ''' Function using the extraction function to create an entire database from a list of .xyz file names'''
     df = []
+    files = get_list_of_files()
+
+    if l ==0: l=len(files) 
+
     os.chdir(f'{PATH}/data')
 
     random_file = random.sample(files, l)
@@ -66,15 +76,15 @@ def making_df(l=len(files), cycle=CYCLE):
             print(round(idx / l * 100, 2))
         df.extend(extracting(file) for _ in range(cycle))
         
-    ds = pd.DataFrame(data = df)
     
-    print(f'Database of lenght {len(ds)} was successfully created based on {len(files)} files')
+    print(f'Database of lenght {len(df)} was successfully created based on {len(files)} files')
 
-    ds.to_csv(os.path.join(PATH, f"{DB}.csv"))
-    return ds
+    df = pd.DataFrame(data=df)
+    df.to_csv(os.path.join(PATH, f"{DB}.csv"))
+    return df
 
 
-def scale_rgb_values(r, g, b, r_range=(0, 17.422), g_range=(0, 44.602), b_range=(0, 9)):
+def scale_rgb_values(r, g, b, r_range=(0, 9.5), g_range=(0, 44.602), b_range=(0, 2.7)):
     r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
     g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
     b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
@@ -157,6 +167,7 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
             making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
 import matplotlib.pyplot as plt
+
 def p(num_epochs, losses, accuracies):
   ''' Function to plot change in loss and accuracy values while training the model '''
   x = range(num_epochs)[2:]
@@ -178,49 +189,3 @@ def p(num_epochs, losses, accuracies):
 
   plt.title('Loss and accuracy[meV] value')
   plt.show()
-    
-if __name__ == '__main__':
-
-    import time
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--makedf', dest='making_dataframe', action='store_true', help='Creating dataframe from scratch ~15 minutes')
-    parser.add_argument('--cal', dest='calibration', action='store_true', help='Calibrate numerical values of RGB representation')
-    parser.add_argument('--create','-c', dest='create_files', action='store_true', help='Create images from scratch ~20 minutes')
-    parser.add_argument('--start', dest='start', type = int, default = 0, help='Number of molecules to take in consideration')
-    parser.add_argument('--end', dest='end', type = int, default = 133885, help='Number of molecules to take in consideration')
-    parser.add_argument('--n', dest='quantity', type = int, default = 133885, help='Number of molecules to take in consideration')
-
-    args = parser.parse_args()
-
-    start = args.start
-    end = args.end
-    d = args.quantity
-
-    if args.making_dataframe:
-        s = time.time()
-        ds = making_df(d)
-        ds[PREDICTED_VALUE] *= 27211
-        
-        e = time.time()
-        print(f'Creating dataframe took {round(e-s,2)} seconds')
-    else:
-        ds = pd.read_csv(f'{DB}.csv')
-
-    if args.calibration:
-        s = time.time()
-        with open('reaxff_cohnsli.lib','r') as f:
-            lines = f.readlines()
-            lines = [x.strip().split() for x in lines]
-
-        calibration(ds, d, bo)
-        e = time.time()
-        print(f"Calibration took {round(e-s,2)} seconds")
-
-    if args.create_files:
-        s = time.time()
-        creating_images(start, end, bo, 0.1, 1)
-        e = time.time()
-        print(f"Creation of images took {round(e-s,2)} seconds")
-
