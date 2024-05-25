@@ -12,6 +12,7 @@ from reax_ff_data import bo
 #does not work well, in effect making_df does not work well either
 
 def get_list_of_files():
+    '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
     try:
         files = os.listdir(f'{PATH}/data')
     except FileNotFoundError:
@@ -20,68 +21,6 @@ def get_list_of_files():
         files = os.listdir(f'{PATH}/data')
     
     return files
-
-def extracting(f, shuffle = SHUFFLE):
-    ''' Extracts information from .xyz file into single dataframe row'''
-    with open(f, 'r') as file:
-        lines = file.readlines()
-
-    df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
-
-    properties = lines[1].split("\t")
-    
-    labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
-              'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
-              'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K']
-    
-    df_record.update(zip(labels, properties))
-
-    #coordinates 
-
-    atom_type, cords, mulliken = [],[],[]
-    for atom in range(df_record['n_atoms']):
-        atom_record = lines[2+atom].replace('\n','').split('\t')
-        atom_type.append(atom_record[0])
-        cords.append(atom_record[1:-1])
-        mulliken.append(atom_record[-1])
-
-    '''If shuffle = True then the order of atoms in the molecule is randomized'''
-    if shuffle == True:
-        combined = list(zip(atom_type, cords, mulliken))
-        random.shuffle(combined)
-        atom_type, cords, mulliken = zip(*combined)
-
-
-    df_record['atom_type'] = atom_type
-    df_record['cords'] = cords
-    df_record['mulliken'] = mulliken
-
-
-    return df_record
-
-def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
-    ''' Function using the extraction function to create an entire database from a list of .xyz file names'''
-    df = []
-    files = get_list_of_files()
-
-    if l ==0: l=len(files) 
-
-    os.chdir(f'{PATH}/data')
-
-    random_file = random.sample(files, l)
-
-    for idx, file in enumerate(random_file):
-        if idx % 1000 == 0:
-            print(round(idx / l * 100, 2))
-        df.extend(extracting(file) for _ in range(cycle))
-        
-    
-    print(f'Database of lenght {len(df)} was successfully created based on {len(files)} files')
-
-    df = pd.DataFrame(data=df)
-    df.to_csv(os.path.join(PATH, f"{DB}.csv"))
-    return df
 
 
 def scale_rgb_values(r, g, b, r_range=(0, 9.5), g_range=(0, 44.602), b_range=(0, 2.7)):
