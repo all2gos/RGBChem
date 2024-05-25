@@ -3,11 +3,20 @@ from scripts.params import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import os
 
 from scripts.dataloaders import *
 from models.conv import *
 from models.flatten import *
 
+def initial_info():
+    '''
+    A function that prints a lot of information and writes it to the log
+    '''
+
+    print('Welcome to the file containing information about training the model', file=LOG_FILE)
+
+    print(f'All of ')
 def learner(dl, model):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
@@ -35,8 +44,16 @@ def learner(dl, model):
 
         acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
 
-        print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV')
+        print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = LOG_FILE)
         losses.append(epoch_loss)
         accuracies.append(acc)
-    
+        torch.save(LOG_FILE.replace('log','pth'))
+        print(f"Model has been saved as {LOG_FILE.replace('log','pth')}")
+
+        print(f'Copy of a params.py settings:', file=LOG_FILE)
+        with open('params.py', 'r') as f:
+            l = f.readlines()
+        for line in l:
+            print(line, file=LOG_FILE)
+
     return losses, accuracies
