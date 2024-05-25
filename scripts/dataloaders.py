@@ -9,7 +9,7 @@ from .params import *
 from .utils import making_rgb_numerically, creating_images
 from torch.utils.data import DataLoader, TensorDataset
 
-def dataloader_ffn():
+def dataloader_ffn(n=0):
     raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
 
     def creating_images(start, end, bo, ds, step=1):
@@ -26,8 +26,9 @@ def dataloader_ffn():
         y_tensor = torch.tensor(y, dtype=torch.float32)
         dataset = TensorDataset(X_tensor, y_tensor)
         return DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    matrix = creating_images(0, len(raw_data)-1, bo, raw_data)
+    
+    if n == 0: n== len(raw_data) -1
+    matrix = creating_images(0, n, bo, raw_data)
 
     training_volume = int(len(matrix) * TRAIN_TEST_SPLIT)
 
