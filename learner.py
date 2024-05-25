@@ -24,30 +24,34 @@ def learner(dl, model):
     losses = []
     accuracies = []
     model = model.to(DEVICE)
+    with open(log_name, 'w') as file:
+        for e in range(EPOCHS):
+            model.train()
+            running_loss = 0.0
 
-    for e in range(EPOCHS):
-        model.train()
-        running_loss = 0.0
+            for inputs, targets in dl[0]:
+                optimizer.zero_grad()
+                outputs = model(inputs)
+                loss = criterion(outputs.t().view(-1), targets.to(torch.float32))
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item() * inputs.size(0)
 
-        for inputs, targets in dl[0]:
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs.t().view(-1), targets.to(torch.float32))
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item() * inputs.size(0)
+            epoch_loss = running_loss / len(dl[0].dataset)
 
-        epoch_loss = running_loss / len(dl[0].dataset)
+            original_value= torch.cat([x[1] for x in dl[1]]) #in the form of one dimensional tensor
+            predicted_value = torch.cat([model(x[0]) for x in dl[1]]).t()
 
-        original_value= torch.cat([x[1] for x in dl[1]]) #in the form of one dimensional tensor
-        predicted_value = torch.cat([model(x[0]) for x in dl[1]]).t()
+            acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
+            
+            losses.append(epoch_loss)
+            accuracies.append(acc)
 
-        acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
+        log_name = LOG_FILE
+        torch.save(log_name.replace('log','pth'))
 
         print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = LOG_FILE)
-        losses.append(epoch_loss)
-        accuracies.append(acc)
-        torch.save(LOG_FILE.replace('log','pth'))
+
         print(f"Model has been saved as {LOG_FILE.replace('log','pth')}")
 
         print(f'Copy of a params.py settings:', file=LOG_FILE)
