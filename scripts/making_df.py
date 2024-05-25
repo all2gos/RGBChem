@@ -5,7 +5,7 @@ import os
 from scripts.params import *
 from scripts.utils import get_list_of_files
 
-def extracting(f, shuffle = SHUFFLE):
+def extracting(f, shuffle:bool = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
     with open(f, 'r') as file:
         lines = file.readlines()
@@ -83,7 +83,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
 
     df.rename(columns={'HOMO-LUMO Gap': 'bandgap'}, inplace=True)
 
-    df['bandgap'] = df['bandgap'].astype('float')
+    df['bandgap'] = df['bandgap'].astype('float32')
 
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
     os.chdir('..')
@@ -91,7 +91,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     correct_order = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
               'Energy of LUMO','bandgap','bandgap_correct','Electronic spatial extent','Zero point vibrational energy',
               'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K', 'atom_type','cords','mulliken']
+              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken']
     
     df = df[correct_order]
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))
