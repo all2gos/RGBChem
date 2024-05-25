@@ -24,7 +24,7 @@ def learner(dl, model):
     losses = []
     accuracies = []
     model = model.to(DEVICE)
-    with open(log_name, 'w') as file:
+    with open(LOG_FILE, 'w') as file:
         for e in range(EPOCHS):
             model.train()
             running_loss = 0.0
@@ -46,18 +46,21 @@ def learner(dl, model):
             
             losses.append(epoch_loss)
             accuracies.append(acc)
+            print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = file)
 
-        log_name = LOG_FILE
-        torch.save(log_name.replace('log','pth'))
+        print(f"{PATH}/{LOG_FILE.replace('log','pth')}")
+        torch.save(model.state_dict(), f"{PATH}/{LOG_FILE.replace('log','pth')}")
 
-        print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = LOG_FILE)
+        
+        print(f"Model has been saved as {LOG_FILE.replace('log','pth')}", file=file)
 
-        print(f"Model has been saved as {LOG_FILE.replace('log','pth')}")
-
-        print(f'Copy of a params.py settings:', file=LOG_FILE)
-        with open('params.py', 'r') as f:
+        print(f"Losses values:{losses}", file=file)
+        print(f"Accuracy values:{accuracies}", file=file)
+        print(f'Copy of a params.py settings:', file=file)
+        print(f'{PATH}/scripts/params.py')
+        with open(f'{PATH}/scripts/params.py', 'r') as f:
             l = f.readlines()
         for line in l:
-            print(line, file=LOG_FILE)
+            print(line, file=file)
 
     return losses, accuracies
