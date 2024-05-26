@@ -52,14 +52,15 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
 
     random_file = random.sample(files, l)
 
+    print(f'Creating a database of length {l}')
     for idx, file in enumerate(random_file):
         if idx % 1000 == 0:
-            print(round(idx / l * 100, 2))
+            print(f'\rProgress: {idx / l * 100:.2f}/100',end='')
         df.extend(extracting(file) for _ in range(cycle))
         
     
     print(f'Database of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE})')
-    print(f'Database database was saved as {PATH}/{DB}.csv"')
+    print(f'Database was saved as {PATH}/{DB}.csv"')
 
     df = pd.DataFrame(data=df)
 
@@ -91,8 +92,10 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     correct_order = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
               'Energy of LUMO','bandgap','bandgap_correct','Electronic spatial extent','Zero point vibrational energy',
               'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken']
+              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken', 'Number_of_C','Number_of_F','Number_of_N','Number_of_O','Number_of_H','Sum_of_heavy_atoms']
     
     df = df[correct_order]
+
+    df = df[df['Sum_of_heavy_atoms']<8]
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))
     return df

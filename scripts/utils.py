@@ -23,10 +23,10 @@ def get_list_of_files():
     return files
 
 
-def scale_rgb_values(r, g, b, r_range=(0, 9.5), g_range=(0, 44.602), b_range=(0, 2.7)):
-    r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
-    g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
-    b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
+def scale_rgb_values(r, g, b, r_range= (0.0, 14.534), g_range= (0.0, 40.81),b_range= (0.0, 2.53)):
+    #r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
+    #g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
+    #b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
 
     return r, g, b
 
@@ -40,11 +40,12 @@ def making_rgb_numerically(row, bo, ds, scaling=True, verbose = False):
     atom_types = eval(ds.atom_type.iloc[row])
 
     r = distance(cords, n_atoms)
-    #r += ionization(atom_types, n_atoms)
+    r += ionization(atom_types, n_atoms)
     #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
     g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
     #b = (atomic_charge(atom_types, n_atoms))
     b = (bond_order(distance(cords, n_atoms), atom_types, bo))
+
     return scale_rgb_values(r,g,b) if scaling ==True else r,g,b
 
 def calibration(ds, d, bo):
@@ -53,18 +54,10 @@ def calibration(ds, d, bo):
     on the entered settings contain values in the range 0-255
     '''
     data = []
-    c = []
     start = random.randint(0,5) #to avoid too long execution
-    for compound in range(start, len(ds), int(len(ds)/d)): #step != 1 to avoid too long execution
-
-        try:
-            data.append(making_rgb_numerically(compound, bo))
-        except ValueError:
-            print(ds.ID.iloc[compound])
-        c.append(ds.ID.iloc[compound])
-
-        if compound%10 == 0:
-            print(compound)
+    for compound in range(start, len(ds), d): #step != 1 to avoid too long execution
+        data.append(making_rgb_numerically(compound, bo, ds, scaling=False))
+        print(f'\r Calibration: {100*compound/len(ds):.2f}%', end='')
 
     max_values = []
     min_values = []
@@ -75,13 +68,12 @@ def calibration(ds, d, bo):
       max_values.append(max_group)
       min_values.append(min_group)
 
-    print("r_range=", (min_values[0], max_values[1]))
+    print("r_range=", (min_values[0], max_values[0]))
     print("g_range=", (min_values[1], max_values[1]))
     print("b_range=", (min_values[2], max_values[2]))
 
 def making_rgb(mat, id, label):
   ''' Function that takes the result of the making_rgb_numerically function and transforms the set of three matrices into a finished png image'''
-  
   combined = np.transpose(np.array((mat[0][0],mat[0][1],mat[0][2])),(1,2,0))
 
   img = np.array(combined, dtype=np.uint8)
@@ -100,7 +92,7 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
     for chem in range(start, end+1, step):
         if random.randint(1,int(1/split)) == int(1/split):
             making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label = TEST_DIR_NAME)
-            print(f"{chem} goes to test set")
+            print(f"\r{chem} goes to test set", end='')
         else:
 
             making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
