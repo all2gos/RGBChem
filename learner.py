@@ -24,8 +24,9 @@ def learner(dl, model):
     losses = []
     accuracies = []
     model = model.to(DEVICE)
-    with open(LOG_FILE, 'w') as file:
+    with open(LOG_FILE, 'w') as file:        
         for e in range(EPOCHS):
+            print(f'\rModel is training: {e+1}/{EPOCHS}')
             model.train()
             running_loss = 0.0
 
@@ -57,7 +58,6 @@ def learner(dl, model):
         print(f"Losses values:{losses}", file=file)
         print(f"Accuracy values:{accuracies}", file=file)
         print(f'Copy of a params.py settings:', file=file)
-        print(f'{PATH}/scripts/params.py')
         with open(f'{PATH}/scripts/params.py', 'r') as f:
             l = f.readlines()
         for line in l:
