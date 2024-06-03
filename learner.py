@@ -31,6 +31,8 @@ def learner(dl, model):
             running_loss = 0.0
 
             for inputs, targets in dl[0]:
+                if torch.cuda.is_available():
+                    inputs, targets = inputs.cuda(), targets.cuda()
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss = criterion(outputs.t().view(-1), targets.to(torch.float32))

@@ -62,12 +62,12 @@ class CustomDataset(torch.utils.data.Dataset):
             image = Image.open(f'{TEST_DIR_NAME}/{img_name}').convert('RGB')
 
         label = self.df[PREDICTED_VALUE].iloc[idx]
-        label = torch.tensor(label, dtype=torch.float32).to(DEVICE)
+        label = torch.tensor(label, dtype=torch.float32)#.to(DEVICE)
 
         if self.transform:
             image = self.transform(image)
             
-        image = image.to(DEVICE)    
+        image = image#.to(DEVICE)    
 
         return image, label
      
