@@ -43,7 +43,7 @@ def learner(dl, model):
             epoch_loss = running_loss / len(dl[0].dataset)
 
             original_value= torch.cat([x[1] for x in dl[1]]) #in the form of one dimensional tensor
-            predicted_value = torch.cat([model(x[0]) for x in dl[1]]).t()
+            predicted_value = torch.cat([model(x[0]) for x in dl[1]]).t().to(DEVICE)
 
             acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
             
