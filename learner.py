@@ -26,7 +26,7 @@ def learner(dl, model):
     model = model.to(DEVICE)
     with open(LOG_FILE, 'w') as file:        
         for e in range(EPOCHS):
-            print(f'\rModel is training: {e+1}/{EPOCHS}')
+            print(f'\rModel is training: {e+1}/{EPOCHS}', end='')
             model.train()
             running_loss = 0.0
 
