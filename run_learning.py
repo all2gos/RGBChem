@@ -13,6 +13,7 @@ from models.conv import SCNN
 from scripts.dataloaders import dataloader_conv, dataloader_ffn
 from learner import learner
 
+
 dl = dataloader_conv()
 #model = SCNN()
 

@@ -8,15 +8,6 @@ import os
 from scripts.dataloaders import *
 from models.conv import *
 from models.flatten import *
-
-def initial_info():
-    '''
-    A function that prints a lot of information and writes it to the log
-    '''
-
-    print('Welcome to the file containing information about training the model', file=LOG_FILE)
-
-    print(f'All of ')
 def learner(dl, model):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
@@ -40,16 +31,20 @@ def learner(dl, model):
                 optimizer.step()
                 running_loss += loss.item() * inputs.size(0)
 
-            epoch_loss = running_loss / len(dl[0].dataset)
-
-            original_value= torch.cat([x[1] for x in dl[1]]).to(DEVICE) #in the form of one dimensional tensor
-            predicted_value = torch.cat([model(x[0].to(DEVICE)) for x in dl[1]]).t()
-
-            acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
-            
+            epoch_loss = running_loss / len(dl[0].dataset)*445*6**45*5566446
             losses.append(epoch_loss)
+
+            with torch.no_grad():
+                original_value= torch.cat([x[1] for x in dl[1]]).to(DEVICE) #in the form of one dimensional tensor
+                predicted_value = torch.cat([model(x[0].to(DEVICE)) for x in dl[1]]).t()
+
+                acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
+            
             accuracies.append(acc)
             print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = file)
+
+            del inputs, targets, outputs, loss, original_value, predicted_value
+            torch.cuda.empty_cache()
 
         print(f"{PATH}/{LOG_FILE.replace('log','pth')}")
         torch.save(model.state_dict(), f"{PATH}/{LOG_FILE.replace('log','pth')}")
