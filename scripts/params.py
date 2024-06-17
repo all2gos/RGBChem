@@ -1,28 +1,31 @@
 import torch
 from torchvision import models 
 
+__all__ = ['BATCH_SIZE', 'COULOMB_DIAGONAL', 'CYCLE', 'DB', 'DEVICE', 'EPOCHS', 'LEARNING_RATE', 'LOG_FILE', 'MATRIX_SIZE', 'MOMENTUM', 'PATH', 'PREDICTED_VALUE', 'SAMPLE', 'SHUFFLE', 'TEST_DIR_NAME',
+ 'TRAIN_DIR_NAME', 'TRAIN_TEST_SPLIT', 'SCALING']
+
 #--- OVERALL PARAMETERS---#
 PATH = '.' #your path to the working directory
 PREDICTED_VALUE = 'bandgap_correct' #or 'Energy of HOMO', 'Energy of LUMO' or any other available properties
 
 #---DATABASE PARAMETERS---#
-DB = 'qm7_demo' #name of your .csv database
+DB = 'qm9' #name of your .csv database
 SAMPLE = 1 #the fraction of data from the dataset to be used for training
 SHUFFLE = False #enable data augmentation option by randomly selecting the order of coordinate atoms in a molecule, used only when creating a database and not images
 CYCLE = 1 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
 
 #---IMAGE PARAMETERS---#
-
 MATRIX_SIZE = 32
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
 COULOMB_DIAGONAL = False # parameter specifying whether values on the diagonal for a coulomb matrix should be displayed
+SCALING = True #if True then the procedure performs the calibration of the numerical values on the basis of which the images are created
 
 #---TRAINING PROCESS PARAMETERS---#
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 LEARNING_RATE = 0.0003
 MOMENTUM = 0.85
-EPOCHS = 128
+EPOCHS = 8
 TRAIN_TEST_SPLIT = 0.8 
 BATCH_SIZE = 32
 
