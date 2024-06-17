@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import os
+import torch 
 
 from reax_ff_data import bo
 from .matrix_function import *
@@ -9,12 +10,26 @@ from .params import *
 from .utils import making_rgb_numerically, creating_images
 from torch.utils.data import DataLoader, TensorDataset
 
-def dataloader_ffn(n=0):
-    raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
 
+def read_files():
+    '''Read the file, if file does not exist then exctract information from .tar file'''
+    try:
+        files = pd.read_csv(f'{PATH}/{DB}.csv')
+    except FileNotFoundError:
+        os.system('mkdir data')
+        os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
+        files = pd.read_csv(f'{PATH}/{DB}.csv')
+    
+    return files
+
+def dataloader_ffn():
+    raw_data = read_files()
+
+    n=len(raw_data) -1
     def creating_images(start, end, bo, ds, step=1):
         l = np.empty((0, 32*32*3 + 1))
         for chem in range(start, end+1, step):
+            print(f'\rCreating dataset:{chem/n*100:.2f}%',end='')
             flatten = making_rgb_numerically(chem, bo, ds, scaling=False)
             fl = np.hstack(flatten).reshape(-1, 1)
             fl = np.append(fl, ds[PREDICTED_VALUE].iloc[chem])
@@ -27,9 +42,7 @@ def dataloader_ffn(n=0):
         dataset = TensorDataset(X_tensor, y_tensor)
         return DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
-    if n == 0: n== len(raw_data) -1
     matrix = creating_images(0, n, bo, raw_data)
-
     training_volume = int(len(matrix) * TRAIN_TEST_SPLIT)
 
     X_train, y_train = matrix[:training_volume, :-1], matrix[:training_volume, -1]
@@ -72,7 +85,7 @@ class CustomDataset(torch.utils.data.Dataset):
         return image, label
      
 def dataloader_conv(n = 0):
-    raw_data = pd.read_csv(f'{PATH}/{DB}.csv')
+    raw_data = read_files()
     if n ==0: n=len(raw_data) -1
     creating_images(0, n, bo, raw_data)
 
