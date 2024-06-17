@@ -1,12 +1,15 @@
-import os
+import os,sys
 import pandas as pd
 import numpy as np
-from .matrix_function import *
+import multiprocessing
+from functools import partial
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from scripts.matrix_function import *
 from PIL import Image
 import random
 from pathlib import Path
-from .params import *
-from .reax_ff_data import bo
+from scripts.params import *
+from scripts.reax_ff_data import bo
 
 
 #does not work well, in effect making_df does not work well either
@@ -95,19 +98,24 @@ def making_rgb(mat, id, label):
 
   pImg.save(f"{PATH}/{label}/{id}.png")
 
-def creating_images(start, end, bo, ds, split=0.1, step=1):
-    ''' A function that is an automation of the making_rgb function '''
+def process_image(chem, bo, ds, split):
+    if random.randint(1, int(1/split)) == int(1/split):
+        making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
+        print(f"\r{chem} goes to test set", end='')
+    else:
+        making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
+def creating_images(start, end, bo, ds, split=0.1, step=1):
     print(f'Creating {end-start+1} images for training model')
     os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
-    os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok = True)
+    os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
 
-    for chem in range(start, end+1, step):
-        if random.randint(1,int(1/split)) == int(1/split):
-            making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label = TEST_DIR_NAME)
-            print(f"\r{chem} goes to test set", end='')
-        else:
-            making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
+    #partial function
+    process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
+
+    #multiprocessing
+    with multiprocessing.Pool() as pool:
+        pool.map(process_image_partial, range(start, end+1, step))
 
 import matplotlib.pyplot as plt
 

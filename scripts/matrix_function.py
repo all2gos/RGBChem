@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+
+
+import sys,os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
 #matrices that take values not only on the diagonal
 

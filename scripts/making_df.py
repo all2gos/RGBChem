@@ -53,12 +53,9 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     print(f'Creating a database of length {l}')
     for idx, file in enumerate(random_file):
         if idx % 1000 == 0:
-            print(f'\rProgress: {idx / l * 100:.2f}/100',end='')
+            print(f'\rProgress: {(idx+883) / l*100:.2f}/100',end='')
         df.extend(extracting(file) for _ in range(cycle))
-        
-    
-    print(f'Database of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE})')
-    print(f'Database was saved as {PATH}/{DB}.csv"')
+
 
     df = pd.DataFrame(data=df)
 
@@ -71,7 +68,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
         df[f'Number_of_{atom}'] = df.atom_type.apply(lambda x: count_(x, atom))
         
     df['Sum_of_heavy_atoms'] = df['Number_of_C'] + df['Number_of_F'] + df['Number_of_N'] + df['Number_of_O']
-#   df = df[df['Sum_of_heavy_atoms'] < 8]
+
     def transform_id(row):
         id_parts = row['ID'].split(" ")
         id_num = id_parts[1]
@@ -94,8 +91,10 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     
     df = df[correct_order]
 
-    df = df[df['Sum_of_heavy_atoms']<8]
-    df.to_csv(os.path.join(PATH, f"{DB}.csv"))
+    if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8] 
+    df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
+    print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE})')
+    print(f'Database was saved as {PATH}/{DB}.csv"')
     return df
 
 if __name__ == '__main__':
