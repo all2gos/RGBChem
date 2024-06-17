@@ -8,6 +8,7 @@ import os
 from scripts.dataloaders import *
 from models.conv import *
 from models.flatten import *
+
 def learner(dl, model):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
@@ -31,7 +32,7 @@ def learner(dl, model):
                 optimizer.step()
                 running_loss += loss.item() * inputs.size(0)
 
-            epoch_loss = running_loss / len(dl[0].dataset)*445*6**45*5566446
+            epoch_loss = running_loss / len(dl[0].dataset)
             losses.append(epoch_loss)
 
             with torch.no_grad():
@@ -40,24 +41,25 @@ def learner(dl, model):
 
                 acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
             
-            accuracies.append(acc)
+            accuracies.append(acc.item())
             print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = file)
 
             del inputs, targets, outputs, loss, original_value, predicted_value
             torch.cuda.empty_cache()
 
-        print(f"{PATH}/{LOG_FILE.replace('log','pth')}")
+        print(f"Log file has been saved as: {PATH}/{LOG_FILE}")
         torch.save(model.state_dict(), f"{PATH}/{LOG_FILE.replace('log','pth')}")
 
         
+        print('--------', file=file)
         print(f"Model has been saved as {LOG_FILE.replace('log','pth')}", file=file)
-
+        print('--------', file=file)
         print(f"Losses values:{losses}", file=file)
         print(f"Accuracy values:{accuracies}", file=file)
+        from scripts.params import __all__
+        print('--------', file=file)
         print(f'Copy of a params.py settings:', file=file)
-        with open(f'{PATH}/scripts/params.py', 'r') as f:
-            l = f.readlines()
-        for line in l:
-            print(line, file=file)
+        for name in __all__:
+            print(f"{name} = {globals()[name]}", file=file)
 
     return losses, accuracies
