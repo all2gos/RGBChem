@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from .params import *
+from scripts.params import *
 #matrices that take values not only on the diagonal
 
 #distance matrix

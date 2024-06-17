@@ -45,9 +45,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     ''' Function using the extraction funcionality to create an entire database from a list of .xyz file names'''
     df = []
     files = get_list_of_files()
-
-    if l ==0: l=len(files) 
-
+    if l==0: l=len(files) 
     os.chdir(f'{PATH}/data')
 
     random_file = random.sample(files, l)
@@ -99,3 +97,6 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     df = df[df['Sum_of_heavy_atoms']<8]
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))
     return df
+
+if __name__ == '__main__':
+    making_df()

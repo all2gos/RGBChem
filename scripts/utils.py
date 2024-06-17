@@ -1,12 +1,12 @@
 import os
 import pandas as pd
 import numpy as np
-from matrix_function import *
+from .matrix_function import *
 from PIL import Image
 import random
 from pathlib import Path
-from params import *
-from reax_ff_data import bo
+from .params import *
+from .reax_ff_data import bo
 
 
 #does not work well, in effect making_df does not work well either

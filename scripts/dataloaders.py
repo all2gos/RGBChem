@@ -4,10 +4,10 @@ import numpy as np
 import os
 import torch 
 
-from reax_ff_data import bo
-from .matrix_function import *
-from .params import *
-from .utils import making_rgb_numerically, creating_images
+from .reax_ff_data import bo
+from scripts.matrix_function import *
+from scripts.params import *
+from scripts.utils import making_rgb_numerically, creating_images
 from torch.utils.data import DataLoader, TensorDataset
 
 
