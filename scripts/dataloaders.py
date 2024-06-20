@@ -91,7 +91,10 @@ class CustomDataset(torch.utils.data.Dataset):
 def dataloader_conv(n = 0):
     raw_data = read_files()
     if n ==0: n=len(raw_data) -1
-    creating_images(0, n, bo, raw_data)
+    if DELETE == True: 
+        creating_images(0, n, bo, raw_data) 
+    else: 
+        print(f'Program did not create new images because DELETE parameter is set to False')
 
     train_transforms = transforms.Compose([transforms.ToTensor()])
     train_dataset = CustomDataset(transform=train_transforms)
