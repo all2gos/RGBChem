@@ -16,7 +16,8 @@ def learner(dl, model):
     losses = []
     accuracies = []
     model = model.to(DEVICE)
-    with open(LOG_FILE, 'w') as file:        
+    with open(LOG_FILE, 'a+') as file:  
+        print('--- TRAINING DETAILS ---', file=file)      
         for e in range(EPOCHS):
             print(f'\rModel is training: {e+1}/{EPOCHS}', end='')
             model.train()
