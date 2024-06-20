@@ -55,9 +55,9 @@ def calibration(ds, d, bo):
       max_values.append(max_group)
       min_values.append(min_group)
 
-    print(f"r_range=, {min_values[0]:.2f}, {max_values[0]:.2f}")
-    print(f"g_range=, {min_values[1]:.2f}, {max_values[1]:.2f}")
-    print(f"b_range=, {min_values[2]:.2f}, {max_values[2]:.2f}")
+    print(f"\nr_range= {min_values[0]:.2f}, {max_values[0]:.2f}")
+    print(f"g_range= {min_values[1]:.2f}, {max_values[1]:.2f}")
+    print(f"b_range= {min_values[2]:.2f}, {max_values[2]:.2f}")
     return (min_values[0],max_values[0]),(min_values[1],max_values[1]),(min_values[2],max_values[2])
 
 def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
@@ -117,7 +117,7 @@ def process_image(chem, bo, ds, split):
 
 def creating_images(start, end, bo, ds, split=0.1, step=1):
     print(f'Creating {end-start+1} images for training model')
-
+    print(f'Rearranging train and test files')
     try:
         shutil.rmtree(f'{PATH}/{TRAIN_DIR_NAME}')
         os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
@@ -135,13 +135,14 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
         global r_range, g_range, b_range
         print(f'Calibration for each spectra (based on {len(ds)/step/len(ds)*100:.2f}% of data):')
         r_range, g_range, b_range = calibration(ds,step,bo)
-
+    
+    print(f'Creating images, this process may take a lot of time')
     #partial function
     process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
 
     #multiprocessing
     with multiprocessing.Pool() as pool:
-        pool.map(process_image_partial, range(start, end+1, step))
+        pool.map(process_image_partial, range(start, end+1))
 
 import matplotlib.pyplot as plt
 
