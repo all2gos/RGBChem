@@ -66,25 +66,23 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
     n_atoms = ds.n_atoms.iloc[row]
     atom_types = eval(ds.atom_type.iloc[row])
 
+    code_string = '''
     r = distance(cords, n_atoms)
     r += ionization(atom_types, n_atoms)
+
     #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
     g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
     #b = (atomic_charge(atom_types, n_atoms))
     b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
+    '''
+    exec(code_string)
 
     #info to LOG_FILE
     with open(LOG_FILE, 'w') as file:
         print('---IMAGE CREATION DETAILS---', file=file)
-        print(f'Function distance called with arguments: cords={cords}, n_atoms={n_atoms}', file=file)
-        print(f'Resulting r (after distance): {r}', file=file)
-        print(f'Function ionization called with arguments: atom_types={atom_types}, n_atoms={n_atoms}', file=file)
-        print(f'Resulting r (after ionization): {r}', file=file)
-        print(f'Function coulomb_matrix called with arguments: cords={cords}, n_atoms={n_atoms}, atom_types={atom_types}, diagonal=False', file=file)
-        print(f'Resulting g: {g}', file=file)
-        print(f'Function bond_order called with arguments: distance(cords, n_atoms)={distance(cords, n_atoms)}, atom_types={atom_types}, bo={bo}', file=file)
-        print(f'Resulting b: {b}', file=file)
+        print(code_string, file=file)
 
     return scale_rgb_values(r,g,b) if scaling ==True else r,g,b
 
