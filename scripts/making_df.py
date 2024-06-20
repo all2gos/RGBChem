@@ -49,7 +49,8 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     files = get_list_of_files()
     if l==0: l=len(files) 
     os.chdir(f'{PATH}/data')
-
+    
+    #random_files = random.sample(files, l)
     print(f'Creating a database of length {l}')
     for idx, file in enumerate(files):
         if idx % 1000 == 0:
