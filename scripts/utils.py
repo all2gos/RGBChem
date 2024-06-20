@@ -11,8 +11,6 @@ from pathlib import Path
 from scripts.params import *
 from scripts.reax_ff_data import bo
 
-#does not work well, in effect making_df does not work well either
-
 def get_list_of_files():
     '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
     try:

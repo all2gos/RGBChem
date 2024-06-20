@@ -51,7 +51,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     os.chdir(f'{PATH}/data')
     
     #random_files = random.sample(files, l)
-    print(f'Creating a database of length {l}')
+    print(f'Creating a database of length {l*CYCLE}')
     for idx, file in enumerate(files):
         if idx % 1000 == 0:
             print(f'\rProgress: {(idx+883) / l*100:.2f}/100',end='')
