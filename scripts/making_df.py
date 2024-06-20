@@ -1,9 +1,11 @@
 import random
 import pandas as pd
-import os
+import os, sys
 
-from params import *
-from utils import get_list_of_files
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from scripts.params import *
+from scripts.utils import get_list_of_files
 
 def extracting(f, shuffle:bool = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''

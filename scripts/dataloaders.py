@@ -5,6 +5,7 @@ import os
 import torch 
 
 from .reax_ff_data import bo
+from scripts.making_df import *
 from scripts.matrix_function import *
 from scripts.params import *
 from scripts.utils import making_rgb_numerically, creating_images
@@ -18,8 +19,11 @@ def read_files():
     except FileNotFoundError:
         os.system('mkdir data')
         os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
-        files = pd.read_csv(f'{PATH}/{DB}.csv')
-    
+        try:
+            files = pd.read_csv(f'{PATH}/{DB}.csv')
+        except FileNotFoundError:
+            making_df()
+            files = pd.read_csv(f'{PATH}/{DB}.csv')         
     return files
 
 def dataloader_ffn():
