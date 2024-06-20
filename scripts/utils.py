@@ -1,4 +1,4 @@
-import os,sys
+import os,sys,shutil
 import pandas as pd
 import numpy as np
 import multiprocessing
@@ -10,7 +10,6 @@ import random
 from pathlib import Path
 from scripts.params import *
 from scripts.reax_ff_data import bo
-
 
 #does not work well, in effect making_df does not work well either
 
@@ -25,11 +24,12 @@ def get_list_of_files():
     
     return files
 
-
-def scale_rgb_values(r, g, b, r_range= (0.0, 14.534), g_range= (0.0, 40.81),b_range= (0.0, 2.53)):
-    #r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
-    #g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
-    #b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
+r_range, g_range, b_range = (0,1),(0,1),(0,1)
+def scale_rgb_values(r, g, b):
+    global r_range, g_range, b_range
+    r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
+    g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
+    b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
 
     return r, g, b
 
@@ -37,12 +37,14 @@ def calibration(ds, d, bo):
 
     '''A function that checks whether the matrices generated 
     on the entered settings contain values in the range 0-255
+
     '''
+    global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
     for compound in range(start, len(ds), d): #step != 1 to avoid too long execution
         data.append(making_rgb_numerically(compound, bo, ds, scaling=False))
-        print(f'\r Calibration: {100*compound/len(ds):.2f}%', end='')
+        print(f'\rCalibration: {100*compound/len(ds):.2f}%', end='')
 
     max_values = []
     min_values = []
@@ -53,9 +55,10 @@ def calibration(ds, d, bo):
       max_values.append(max_group)
       min_values.append(min_group)
 
-    print("r_range=", (min_values[0], max_values[0]))
-    print("g_range=", (min_values[1], max_values[1]))
-    print("b_range=", (min_values[2], max_values[2]))
+    print(f"r_range=, {min_values[0]:.2f}, {max_values[0]:.2f}")
+    print(f"g_range=, {min_values[1]:.2f}, {max_values[1]:.2f}")
+    print(f"b_range=, {min_values[2]:.2f}, {max_values[2]:.2f}")
+    return (min_values[0],max_values[0]),(min_values[1],max_values[1]),(min_values[2],max_values[2])
 
 def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
     '''function that, based on a single row in the database, creates three 
@@ -65,6 +68,15 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
     cords = eval(ds.cords.iloc[row])
     n_atoms = ds.n_atoms.iloc[row]
     atom_types = eval(ds.atom_type.iloc[row])
+    
+    r = distance(cords, n_atoms)
+    r += ionization(atom_types, n_atoms)
+
+    #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+    g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
+    #b = (atomic_charge(atom_types, n_atoms))
+    b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     code_string = '''
     r = distance(cords, n_atoms)
@@ -77,7 +89,7 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
     b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     '''
-    exec(code_string)
+
 
     #info to LOG_FILE
     with open(LOG_FILE, 'w') as file:
@@ -105,8 +117,24 @@ def process_image(chem, bo, ds, split):
 
 def creating_images(start, end, bo, ds, split=0.1, step=1):
     print(f'Creating {end-start+1} images for training model')
-    os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
-    os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
+
+    try:
+        shutil.rmtree(f'{PATH}/{TRAIN_DIR_NAME}')
+        os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
+    except FileNotFoundError:
+        os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
+
+    try:
+        shutil.rmtree(f'{PATH}/{TEST_DIR_NAME}')
+        os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
+    except FileNotFoundError:
+        os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
+    
+    if SCALING==True:
+        step = 30
+        global r_range, g_range, b_range
+        print(f'Calibration for each spectra (based on {len(ds)/step/len(ds)*100:.2f}% of data):')
+        r_range, g_range, b_range = calibration(ds,step,bo)
 
     #partial function
     process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
