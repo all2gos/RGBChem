@@ -8,6 +8,9 @@ import os
 from scripts.dataloaders import *
 from models.conv import *
 from models.flatten import *
+from scripts.early_stopping import *
+
+early_stopping = EarlyStopping(patience=10, verbose=True)
 
 def learner(dl, model):
     criterion = nn.MSELoss()
@@ -34,6 +37,12 @@ def learner(dl, model):
                 running_loss += loss.item() * inputs.size(0)
 
             epoch_loss = running_loss / len(dl[0].dataset)
+            early_stopping(epoch_loss, model)
+    
+            if early_stopping.early_stop:
+               print("Early stopping")
+               break
+
             losses.append(epoch_loss)
 
             with torch.no_grad():
@@ -48,7 +57,7 @@ def learner(dl, model):
             del inputs, targets, outputs, loss, original_value, predicted_value
             torch.cuda.empty_cache()
 
-        print(f"Log file has been saved as: {PATH}/{LOG_FILE}")
+        print(f"\nLog file has been saved as: {PATH}/{LOG_FILE}")
         torch.save(model.state_dict(), f"{PATH}/{LOG_FILE.replace('log','pth')}")
 
         
