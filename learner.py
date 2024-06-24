@@ -10,7 +10,7 @@ from models.conv import *
 from models.flatten import *
 from scripts.early_stopping import *
 
-early_stopping = EarlyStopping(patience=PATIENCE, verbose=True, delta = 0, path=f'checkpoint_{LOG_FILE.replace('log','pth')}')
+early_stopping = EarlyStopping(patience=7, verbose=True, delta = 0.01, path=f'checkpoint_{LOG_FILE.replace('log','pth')}')
 
 def learner(dl, model):
     criterion = nn.MSELoss()
@@ -22,7 +22,7 @@ def learner(dl, model):
     with open(LOG_FILE, 'a+') as file:  
         print('--- TRAINING DETAILS ---', file=file)      
         for e in range(EPOCHS):
-            print(f'\rModel is training: {e+1}/{EPOCHS}', end='')
+            print(f'\rModel is training: {e+1}/{EPOCHS}', end=' ')
             model.train()
             running_loss = 0.0
 

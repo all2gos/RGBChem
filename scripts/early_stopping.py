@@ -5,7 +5,7 @@ class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
         """
             patience (int): how long wait to the next improvment
-            delta (float): minimal change 
+            delta (float): minimal change (fraction)
         """
         self.patience = patience
         self.verbose = verbose
@@ -22,10 +22,10 @@ class EarlyStopping:
         if self.best_score is None:
             self.best_score = score
             self.save_checkpoint(val_loss, model)
-        elif score < self.best_score + self.delta:
+        elif 1- (score/self.best_score) > delta:
             self.counter += 1
             if self.verbose:
-                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+                print(f'EarlyStopping counter: {self.counter} out of {self.patience} (Current loss: {val_loss:.6f})')
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
@@ -35,6 +35,6 @@ class EarlyStopping:
 
     def save_checkpoint(self, val_loss, model):
         if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f})')
+            print(f'New best model:({self.val_loss_min:.6f} --> {val_loss:.6f}), Impr: {1- (score/self.best_score)*100}%')
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
