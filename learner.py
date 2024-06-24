@@ -10,7 +10,7 @@ from models.conv import *
 from models.flatten import *
 from scripts.early_stopping import *
 
-early_stopping = EarlyStopping(patience=10, verbose=True)
+early_stopping = EarlyStopping(patience=PATIENCE, verbose=True, delta = 0, path=f'checkpoint_{LOG_FILE.replace('log','pth')}')
 
 def learner(dl, model):
     criterion = nn.MSELoss()

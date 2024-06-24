@@ -4,11 +4,8 @@ import numpy as np
 class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
         """
-        Args:
-            patience (int): Ile epok czekać po ostatniej poprawie.
-            verbose (bool): Jeśli True, wyświetla informacje o każdym pogorszeniu.
-            delta (float): Minimalna zmiana do uznania za poprawę.
-            path (str): Ścieżka do zapisu najlepszego modelu.
+            patience (int): how long wait to the next improvment
+            delta (float): minimal change 
         """
         self.patience = patience
         self.verbose = verbose
@@ -37,7 +34,6 @@ class EarlyStopping:
             self.counter = 0
 
     def save_checkpoint(self, val_loss, model):
-        '''Zapisuje najlepszy model, jeśli nastąpiła poprawa.'''
         if self.verbose:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f})')
         torch.save(model.state_dict(), self.path)
