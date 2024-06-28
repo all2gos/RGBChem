@@ -17,13 +17,13 @@ def read_files():
     try:
         files = pd.read_csv(f'{PATH}/{DB}.csv')
     except FileNotFoundError:
-        os.system('mkdir data')
-        os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
         try:
-            files = pd.read_csv(f'{PATH}/{DB}.csv')
-        except FileNotFoundError:
             making_df()
-            files = pd.read_csv(f'{PATH}/{DB}.csv')         
+        except FileNotFoundError:
+            os.system('mkdir data')
+            os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
+            making_df()
+        files = pd.read_csv(f'{PATH}/{DB}.csv')
     return files
 
 def dataloader_ffn():
@@ -86,7 +86,7 @@ class CustomDataset(torch.utils.data.Dataset):
             
         image = image#.to(DEVICE)    
 
-        return image, label
+        return image, label, img_name
      
 def dataloader_conv(n = 0):
     raw_data = read_files()
