@@ -109,7 +109,7 @@ def making_rgb(mat, id, label):
 def process_image(chem, bo, ds, split):
     if random.randint(1, int(1/split)) == int(1/split):
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
-        print(f"\r{chem} goes to test set", end='')
+        #print(f"\r{chem} goes to test set", end='')
     else:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
@@ -129,7 +129,7 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
         os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
     
     if SCALING==True:
-        step = 30
+        step = STEP
         global r_range, g_range, b_range
         print(f'Calibration for each spectra (based on {len(ds)/step/len(ds)*100:.2f}% of data):')
         r_range, g_range, b_range = calibration(ds,step,bo)
