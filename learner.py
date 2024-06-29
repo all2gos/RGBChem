@@ -10,11 +10,12 @@ from models.conv import *
 from models.flatten import *
 from scripts.early_stopping import *
 
-early_stopping = EarlyStopping(patience=7, verbose=True, delta = 0.01, path=f'checkpoint_{LOG_FILE.replace('log','pth')}')
 
 def learner(dl, model):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
+
+    early_stopping = EarlyStopping(patience=PATIENCE, verbose=True, delta = 0.01, path=f"checkpoint_{LOG_FILE.replace('log','pth')}")
 
     losses = []
     accuracies = []
@@ -31,7 +32,7 @@ def learner(dl, model):
                     inputs, targets = inputs.cuda(), targets.cuda()
                 optimizer.zero_grad()
                 outputs = model(inputs)
-                loss = criterion(outputs.t().view(-1), targets.to(torch.float32))
+                loss = criterion(outputs.view(-1), targets.to(torch.float32))
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item() * inputs.size(0)
@@ -45,14 +46,16 @@ def learner(dl, model):
 
             losses.append(epoch_loss)
 
+
             with torch.no_grad():
-                original_value= torch.cat([x[1] for x in dl[1]]).to(DEVICE) #in the form of one dimensional tensor
+                original_value= torch.cat([x[1] for x in dl[1]]).to(DEVICE).t() #in the form of one dimensional tensor
                 predicted_value = torch.cat([model(x[0].to(DEVICE)) for x in dl[1]]).t()
 
                 acc = sum(sum(torch.abs(original_value-predicted_value)))/predicted_value.size()[1]*27211
             
             accuracies.append(acc.item())
             print(f'Epoch [{e+1}/{EPOCHS}], Loss: {epoch_loss:.6f}, Acc: {acc:.2f} meV', file = file)
+
 
             del inputs, targets, outputs, loss, original_value, predicted_value
             torch.cuda.empty_cache()

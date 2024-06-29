@@ -62,48 +62,52 @@ from torchvision import transforms
 from PIL import Image
 
 class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, transform=None):
+    def __init__(self, directory, n = 0, transform=None):
         self.transform = transform
         name = f'{DB}.csv'
         self.df = pd.read_csv(os.path.join(PATH, name))
+        self.directory = directory
+        self.image_files = [f for f in os.listdir(directory) if f.endswith('.png')]
+
+        if n > 0:
+            self.df = self.df[:n]
+            self.image_files = self.image_files[:n]
 
     def __len__(self):
-        return len(self.df)
+        return len(self.image_files)
 
     def __getitem__(self, idx):
-        img_name = f"{self.df['ID'].iloc[idx]}.png"
-        try: 
-            image = Image.open(f'{TRAIN_DIR_NAME}/{img_name}').convert('RGB') 
-
-        except FileNotFoundError:
-            image = Image.open(f'{TEST_DIR_NAME}/{img_name}').convert('RGB')
-
-        label = self.df[PREDICTED_VALUE].iloc[idx]
-        label = torch.tensor(label, dtype=torch.float32)#.to(DEVICE)
+        img_name = self.image_files[idx]
+        img_path = os.path.join(self.directory, img_name)
+        image = Image.open(img_path).convert('RGB')
+        
+        label = self.df[self.df.ID == img_name[:-4]][PREDICTED_VALUE].values
+        label = torch.tensor(label, dtype=torch.float64)#.to(DEVICE)
 
         if self.transform:
             image = self.transform(image)
             
         image = image#.to(DEVICE)    
+        return image, label#, img_name
 
-        return image, label, img_name
      
 def dataloader_conv(n = 0):
     raw_data = read_files()
     if n ==0: n=len(raw_data) -1
     if DELETE == True: 
-        creating_images(0, n, bo, raw_data) 
+        creating_images(0, n-1, bo, raw_data) 
     else: 
         print(f'Program did not create new images because DELETE parameter is set to False')
 
+    
     train_transforms = transforms.Compose([transforms.ToTensor()])
-    train_dataset = CustomDataset(transform=train_transforms)
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    train_dataset = CustomDataset(transform=train_transforms, n=n, directory=TRAIN_DIR_NAME)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=False, drop_last=True if len(train_dataset)%BATCH_SIZE !=0 else False)
 
-    val_dataset = CustomDataset(transform=train_transforms)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    val_dataset = CustomDataset(transform=train_transforms, n=n, directory= TEST_DIR_NAME)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True if len(val_dataset)%BATCH_SIZE !=0 else False)
 
 
-    return train_loader, val_loader
+    return train_loader, val_loader, train_dataset, val_dataset
 
 
