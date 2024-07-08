@@ -88,17 +88,29 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False):
 
     '''
 
+    if scaling:
+        r,g,b = scale_rgb_values(r,g,b) 
+    #pasting the matrix into larger black matrix 
+    init_cords = (random.randint(0,MATRIX_SIZE-n_atoms), random.randint(0,MATRIX_SIZE-n_atoms))
+
+    final_r = np.zeros((MATRIX_SIZE,MATRIX_SIZE))
+    final_g = np.zeros((MATRIX_SIZE,MATRIX_SIZE))
+    final_b = np.zeros((MATRIX_SIZE,MATRIX_SIZE))
+
+    final_r[init_cords[0]:init_cords[0] + n_atoms, init_cords[1]:init_cords[1] + n_atoms] = r
+    final_g[init_cords[0]:init_cords[0] + n_atoms, init_cords[1]:init_cords[1] + n_atoms] = g
+    final_b[init_cords[0]:init_cords[0] + n_atoms, init_cords[1]:init_cords[1] + n_atoms] = b
 
     #info to LOG_FILE
     with open(LOG_FILE, 'w') as file:
         print('---IMAGE CREATION DETAILS---', file=file)
         print(code_string, file=file)
 
-    return scale_rgb_values(r,g,b) if scaling ==True else r,g,b
+    return final_r, final_g, final_b
 
 def making_rgb(mat, id, label):
   ''' Function that takes the result of the making_rgb_numerically function and transforms the set of three matrices into a finished png image'''
-  combined = np.transpose(np.array((mat[0][0],mat[0][1],mat[0][2])),(1,2,0))
+  combined = np.transpose(np.array((mat[0],mat[1],mat[2])),(1,2,0))
 
   img = np.array(combined, dtype=np.uint8)
 

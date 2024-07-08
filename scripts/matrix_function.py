@@ -10,7 +10,7 @@ from scripts.params import *
 #distance matrix
 
 def distance(coordinates, n_atoms):
-    dist_mat = np.zeros((MATRIX_SIZE,MATRIX_SIZE))
+    dist_mat = np.zeros((n_atoms,n_atoms))
 
     min_length = min(n_atoms, len(coordinates))
 
@@ -46,7 +46,7 @@ def bond_order(mat, atom_type, bo):
 
 def coulomb_matrix(coordinates, n_atoms, atom_type, diagonal = True):
     
-    c_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    c_mat = np.zeros((n_atoms, n_atoms))
     Z = {'H':1, 'C':6, 'N': 7, 'O':8,'F':9}
     min_len = min(n_atoms, len(coordinates))
 
@@ -68,7 +68,7 @@ def coulomb_matrix(coordinates, n_atoms, atom_type, diagonal = True):
 
 #making mulliken matrix
 def mulliken(m, n_atoms):
-    m_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    m_mat = np.zeros((n_atoms, n_atoms))
     for i in range(n_atoms):
         m_mat[i][i] = float(m[i].replace('*^','e'))
 
@@ -76,7 +76,7 @@ def mulliken(m, n_atoms):
 
 #making atomic charge matrix
 def atomic_charge(atom_type, n_atoms):
-    a_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    a_mat = np.zeros((n_atoms, n_atoms))
 
     atom_dict = {'H':1, 'O':8, 'C':6, 'N':7, 'F':9}
     for i in range(n_atoms):
@@ -87,7 +87,7 @@ def atomic_charge(atom_type, n_atoms):
 
 #making electronegativity matrix
 def electronegativity(atom_type, n_atoms):
-    a_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    a_mat = np.zeros((n_atoms, n_atoms))
 
 
     atom_dict = {'H':2.20, 'O':3.44, 'C':2.55, 'N':3.04, 'F':3.98}
@@ -98,7 +98,7 @@ def electronegativity(atom_type, n_atoms):
 
 #making electron affinity matrix
 def electronaffinity(atom_type, n_atoms):
-    a_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    a_mat = np.zeros((n_atoms, n_atoms))
 
 
     atom_dict = {'H':0.755, 'O':1.46, 'C':1.595, 'N':0.07, 'F':3.40}
@@ -108,7 +108,7 @@ def electronaffinity(atom_type, n_atoms):
     return a_mat
 
 def ionization(atom_type, n_atoms):
-    a_mat = np.zeros((MATRIX_SIZE, MATRIX_SIZE))
+    a_mat = np.zeros((n_atoms, n_atoms))
     
 
     atom_dict = {'H':13.598, 'O':13.618, 'C':11.261, 'N':14.534, 'F':17.422}
