@@ -9,7 +9,7 @@ PATH = '.' #your path to the working directory
 PREDICTED_VALUE = 'bandgap' #or 'Energy of HOMO', 'Energy of LUMO' or any other available properties
 
 #---DATABASE PARAMETERS---#
-DB = 'qm9' #name of your .csv database
+DB = 'qm7_demo' #name of your .csv database
 SAMPLE = 1 #the fraction of data from the dataset to be used for training
 CYCLE = 1 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
 SHUFFLE = 'partial' #shuffle is a complex parameter: when it is set to full then each time order of the atoms in particle is randomly selected,
@@ -19,7 +19,7 @@ SHUFFLE = 'partial' #shuffle is a complex parameter: when it is set to full then
 
 
 #---IMAGE PARAMETERS---#
-MATRIX_SIZE = 0 #if zero then images doee not have margins
+MATRIX_SIZE = 32 #if zero then images doee not have margins
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
 TYPE_OF_IMAGE = 'A' #or any other letter available 

@@ -68,8 +68,8 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
     atom_types = eval(ds.atom_type.iloc[row])
     
     if image_type == 'A':
-        r = distance(cords, n_atoms)
-        r += ionization(atom_types, n_atoms)
+        #r = distance(cords, n_atoms)
+        r = atomic_charge(atom_types, n_atoms)
 
         #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)

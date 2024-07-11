@@ -13,7 +13,6 @@ def extracting(f, shuffle:bool = SHUFFLE):
         lines = file.readlines()
 
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
-
     properties = lines[1].split("\t")
     
     labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
@@ -22,7 +21,8 @@ def extracting(f, shuffle:bool = SHUFFLE):
               'Free energy at 298K','Heat capacity at 298K']
     
     df_record.update(zip(labels, properties))
-
+    
+    p = df_record['n_atoms'] - df_record['atom_type'].count('H')
     #coordinates 
     atom_type, cords, mulliken = [],[],[]
     for atom in range(df_record['n_atoms']):
@@ -37,17 +37,24 @@ def extracting(f, shuffle:bool = SHUFFLE):
         random.shuffle(combined)
         atom_type, cords, mulliken = zip(*combined)
     elif shuffle == 'partial':
-        heavy_atoms = list(zip(atom_type[:n_atoms], cords[:n_atoms],mulliken[:n_atoms]))
-        hydrogen = list(zip(atom_type[n_atoms:],cords[n_atoms:],mulliken[n_atoms:]))
+        heavy_atoms = list(zip(atom_type[:p], cords[:p],mulliken[:p]))
+        hydrogen = list(zip(atom_type[p:],cords[p:],mulliken[p:]))
         random.shuffle(heavy_atoms)
         random.shuffle(hydrogen)
 
-        atom_type, cords, mulliken = zip(*heavy_atoms) + zip(*hydrogen)
+        atom_type_heavy, cords_heavy, mulliken_heavy = zip(*heavy_atoms) 
 
+        if len(hydrogen) != 0:
+            atom_type_h, cords_h, mulliken_h = zip(*hydrogen)
+
+            atom_type, cords, mulliken = atom_type_heavy+atom_type_h, cords_heavy+cords_h, mulliken_heavy+mulliken_h
+        else:
+            atom_type, cords, mulliken = atom_type_heavy, cords_heavy, mulliken_heavy
     '''Putting all together'''
     df_record['atom_type'] = atom_type
     df_record['cords'] = cords
     df_record['mulliken'] = mulliken
+    print(atom_type, df_record['atom_type'].count('H'), df_record['n_atoms'], p)
     return df_record
 
 def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
