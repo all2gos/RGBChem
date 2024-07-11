@@ -2,7 +2,7 @@ import torch
 from torchvision import models 
 
 __all__ = ['BATCH_SIZE', 'CYCLE', 'DB', 'DEVICE', 'EPOCHS', 'LEARNING_RATE', 'LOG_FILE', 'MATRIX_SIZE', 'MOMENTUM', 'PATH', 'PREDICTED_VALUE', 'SAMPLE', 'SHUFFLE', 'TEST_DIR_NAME',
- 'TRAIN_DIR_NAME', 'TRAIN_TEST_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR']
+ 'TRAIN_DIR_NAME', 'TRAIN_TEST_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR','MARGIN']
 
 #--- OVERALL PARAMETERS---#
 PATH = '.' #your path to the working directory
@@ -15,30 +15,31 @@ SHUFFLE = False #enable data augmentation option by randomly selecting the order
 CYCLE = 1 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
 
 #---IMAGE PARAMETERS---#
-MATRIX_SIZE = 32
+MATRIX_SIZE = 0 #if zero then images doee not have margins
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
 TYPE_OF_IMAGE = 'A' #or any other letter available 
-RANDOM_OR = True #if True then images will be placed randomly
+RANDOM_OR = False #if True then images will be placed randomly
 SCALING = True
 DELETE = True #if True then the script will delete all so far generated files and created new one from scratch
+MARGIN = 'avg' #the way the margins are filled
 
 #---TRAINING PROCESS PARAMETERS---#
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL = 'resnet18'
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0003
 MOMENTUM = 0.9
 EPOCHS = 512
 TRAIN_TEST_SPLIT = 0.9
 BATCH_SIZE = 64
 
 #---EARLY STOPPING---#
-PATIENCE = 10
+PATIENCE = 20
 DELTA = 0
 
 #---LOGGING---#
 #name of the log file
 if SHUFFLE == False:
-    LOG_FILE = f'{DB}{TYPE_OF_IMAGE}{MODEL}_e{EPOCHS}_{PREDICTED_VALUE}_bs{BATCH_SIZE}.log' 
+    LOG_FILE = f'{DB}{TYPE_OF_IMAGE}{MODEL}_{MARGIN}_e{EPOCHS}_{PREDICTED_VALUE}_bs{BATCH_SIZE}.log' 
 else: 
-    LOG_FILE = f'{DB}{TYPE_OF_IMAGE}{MODEL}_e{EPOCHS}_{PREDICTED_VALUE}_bs{BATCH_SIZE}_shuffle_{CYCLE}.log' 
+    LOG_FILE = f'{DB}{TYPE_OF_IMAGE}{MODEL}_{MARGIN}_e{EPOCHS}_{PREDICTED_VALUE}_bs{BATCH_SIZE}_shuffle_{CYCLE}.log' 

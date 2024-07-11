@@ -83,8 +83,6 @@ class CustomDataset(torch.utils.data.Dataset):
 
         if self.transform:
             image = self.transform(image)
-            
-        image = image#.to(DEVICE)    
 
         return image, label
      
@@ -96,7 +94,7 @@ def dataloader_conv(n = 0):
     else: 
         print(f'Program did not create new images because DELETE parameter is set to False')
 
-    train_transforms = transforms.Compose([transforms.ToTensor()])
+    train_transforms = transforms.Compose([transforms.Resize((32,32)), transforms.ToTensor()])
     train_dataset = CustomDataset(transform=train_transforms)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
