@@ -32,10 +32,17 @@ def extracting(f, shuffle:bool = SHUFFLE):
         mulliken.append(atom_record[-1])
 
     '''If shuffle = True then the order of atoms in the molecule is randomized'''
-    if shuffle == True:
+    if shuffle == 'full':
         combined = list(zip(atom_type, cords, mulliken))
         random.shuffle(combined)
         atom_type, cords, mulliken = zip(*combined)
+    elif shuffle == 'partial':
+        heavy_atoms = list(zip(atom_type[:n_atoms], cords[:n_atoms],mulliken[:n_atoms]))
+        hydrogen = list(zip(atom_type[n_atoms:],cords[n_atoms:],mulliken[n_atoms:]))
+        random.shuffle(heavy_atoms)
+        random.shuffle(hydrogen)
+
+        atom_type, cords, mulliken = zip(*heavy_atoms) + zip(*hydrogen)
 
     '''Putting all together'''
     df_record['atom_type'] = atom_type

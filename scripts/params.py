@@ -11,8 +11,12 @@ PREDICTED_VALUE = 'bandgap' #or 'Energy of HOMO', 'Energy of LUMO' or any other 
 #---DATABASE PARAMETERS---#
 DB = 'qm9' #name of your .csv database
 SAMPLE = 1 #the fraction of data from the dataset to be used for training
-SHUFFLE = False #enable data augmentation option by randomly selecting the order of coordinate atoms in a molecule, used only when creating a database and not images
 CYCLE = 1 #number of images generated to one particle (should be greater than 1 only when coordinate shuffling is enabled)
+SHUFFLE = 'partial' #shuffle is a complex parameter: when it is set to full then each time order of the atoms in particle is randomly selected,
+#when it is set to partial then the algorithm split atoms in particle into two groups: heavy atoms and hydrogens, and randomly selected order 
+#inside these particular group
+#when it is set to anything else then shuffle will not be perform
+
 
 #---IMAGE PARAMETERS---#
 MATRIX_SIZE = 0 #if zero then images doee not have margins
