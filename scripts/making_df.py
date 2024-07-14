@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
 from scripts.utils import get_list_of_files
 
-def extracting(f, shuffle:bool = SHUFFLE):
+def extracting(f, shuffle = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
     with open(f, 'r') as file:
         lines = file.readlines()
@@ -22,7 +22,6 @@ def extracting(f, shuffle:bool = SHUFFLE):
     
     df_record.update(zip(labels, properties))
     
-    p = df_record['n_atoms'] - df_record['atom_type'].count('H')
     #coordinates 
     atom_type, cords, mulliken = [],[],[]
     for atom in range(df_record['n_atoms']):
@@ -31,7 +30,8 @@ def extracting(f, shuffle:bool = SHUFFLE):
         cords.append(atom_record[1:-1])
         mulliken.append(atom_record[-1])
 
-    '''If shuffle = True then the order of atoms in the molecule is randomized'''
+    p = df_record['n_atoms'] - atom_type.count('H')
+    '''If shuffle = full or partial then the order of atoms in the molecule is randomized'''
     if shuffle == 'full':
         combined = list(zip(atom_type, cords, mulliken))
         random.shuffle(combined)
@@ -54,7 +54,6 @@ def extracting(f, shuffle:bool = SHUFFLE):
     df_record['atom_type'] = atom_type
     df_record['cords'] = cords
     df_record['mulliken'] = mulliken
-    print(atom_type, df_record['atom_type'].count('H'), df_record['n_atoms'], p)
     return df_record
 
 def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:

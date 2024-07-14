@@ -2,7 +2,7 @@ import torch
 from torchvision import models 
 
 __all__ = ['BATCH_SIZE', 'CYCLE', 'DB', 'DEVICE', 'EPOCHS', 'LEARNING_RATE', 'LOG_FILE', 'MATRIX_SIZE', 'MOMENTUM', 'PATH', 'PREDICTED_VALUE', 'SAMPLE', 'SHUFFLE', 'TEST_DIR_NAME',
- 'TRAIN_DIR_NAME', 'TRAIN_TEST_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR','MARGIN']
+ 'TRAIN_DIR_NAME', 'TRAIN_TEST_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR','MARGIN','RESIZE']
 
 #--- OVERALL PARAMETERS---#
 PATH = '.' #your path to the working directory
@@ -19,7 +19,7 @@ SHUFFLE = 'partial' #shuffle is a complex parameter: when it is set to full then
 
 
 #---IMAGE PARAMETERS---#
-MATRIX_SIZE = 32 #if zero then images doee not have margins
+MATRIX_SIZE = 28 #if zero then images doee not have margins
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
 TYPE_OF_IMAGE = 'A' #or any other letter available 
@@ -27,7 +27,7 @@ RANDOM_OR = False #if True then images will be placed randomly
 SCALING = True
 DELETE = True #if True then the script will delete all so far generated files and created new one from scratch
 MARGIN = 'avg' #the way the margins are filled
-
+RESIZE = 23 
 #---TRAINING PROCESS PARAMETERS---#
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL = 'resnet18'

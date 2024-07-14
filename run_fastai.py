@@ -32,7 +32,8 @@ print(f'{len(filtered)} out of {len(ds)} samples were selected')
 
 dblock = DataBlock(blocks=(ImageBlock, RegressionBlock),
                    get_x=get_x, get_y=get_y,
-                   splitter=RandomSplitter(valid_pct=0.1, seed=42)).dataloaders(filtered, bs=BATCH_SIZE)
+                   splitter=RandomSplitter(valid_pct=0.1, seed=42),
+                   item_tfms = Resize(RESIZE)).dataloaders(filtered, bs=BATCH_SIZE)
 
 learn = vision_learner(dblock, eval(MODEL), metrics=mae, lr=LEARNING_RATE)
 saving_callbacks = SaveModelCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, fname=f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai')}")
