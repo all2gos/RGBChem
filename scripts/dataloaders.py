@@ -17,13 +17,16 @@ def read_files():
     try:
         files = pd.read_csv(f'{PATH}/{DB}.csv')
     except FileNotFoundError:
-        os.system('mkdir data')
-        os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
+        making_df()
+        files=pd.read_csv(f'{PATH}/{DB}.csv')
+
         try:
-            files = pd.read_csv(f'{PATH}/{DB}.csv')
-        except FileNotFoundError:
+            os.system('mkdir data')
+            os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
             making_df()
             files = pd.read_csv(f'{PATH}/{DB}.csv')         
+        except:
+            print('Unknown error )
     return files
 
 def dataloader_ffn():
