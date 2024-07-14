@@ -26,7 +26,7 @@ def read_files():
             making_df()
             files = pd.read_csv(f'{PATH}/{DB}.csv')         
         except:
-            print('Unknown error )
+            print('Unknown error occured during loading the databse file' )
     return files
 
 def dataloader_ffn():
