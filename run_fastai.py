@@ -4,6 +4,8 @@ from scripts.params import *
 from fastai.vision.all import *
 from scripts.params import *
 import torch
+import time
+import subprocess
 
 #this function perform database creation, .png files creation and DataLoader and Dataset PyTorch object creation. Moreover it is possible to create
 #a fastai workflow build on that components which we will show you in this demo.
@@ -35,11 +37,30 @@ dblock = DataBlock(blocks=(ImageBlock, RegressionBlock),
                    splitter=RandomSplitter(valid_pct=0.1, seed=42),
                    item_tfms = Resize(RESIZE)).dataloaders(filtered, bs=BATCH_SIZE)
 
-learn = vision_learner(dblock, eval(MODEL), metrics=mae, lr=LEARNING_RATE)
+learn = vision_learner(dblock, resnet18, metrics=mae, lr=LEARNING_RATE)
 saving_callbacks = SaveModelCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, fname=f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai')}")
 early_stopping_cb = EarlyStoppingCallback (monitor='valid_loss', comp=np.less, min_delta=DELTA, patience=PATIENCE)
 
-learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
+class WaitTimeCallback(Callback):
+    def get_battery_info(self):
+        result = subprocess.check_output(['acpi', '-b'], text=True)
+        try:
+            idx = result.index('%') 
+            battery_level = int(result[idx-2:idx])
+            total_seconds = (80-battery_level)*40
+        except ValueError:
+            print(f"Info about charge level not found")
+            total_seconds = 200
+
+        return battery_level, max(0,total_seconds)
+
+    def after_epoch(self):
+        info = self.get_battery_info()
+        print(f'Dealing with Battery level: charge level: {info[0]}. Waiting for {info[1]} seconds...')
+        time.sleep(info[1])
+
+learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
+learn.export(f"{PATH}/{LOG_FILE.replace('.log','_fastai.pkl')}")
 
 print('Validation...')
 
