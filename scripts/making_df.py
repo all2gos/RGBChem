@@ -1,6 +1,8 @@
 import random
 import pandas as pd
 import os, sys
+from scipy.special import factorial
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -82,6 +84,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
         df[f'Number_of_{atom}'] = df.atom_type.apply(lambda x: count_(x, atom))
         
     df['Sum_of_heavy_atoms'] = df['Number_of_C'] + df['Number_of_F'] + df['Number_of_N'] + df['Number_of_O']
+    df['possible_comb'] = factorial(df['Sum_of_heavy_atoms']) * factorial(df['Number_of_H'])
 
     def transform_id(row):
         id_parts = row['ID'].split(" ")
@@ -96,12 +99,13 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     df['bandgap'] = df['bandgap'].astype('float32')
 
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
+    df = df[df['possible_comb'] > 2*CYCLE]
     os.chdir('..')
 
     correct_order = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
               'Energy of LUMO','bandgap','bandgap_correct','Electronic spatial extent','Zero point vibrational energy',
               'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken', 'Number_of_C','Number_of_F','Number_of_N','Number_of_O','Number_of_H','Sum_of_heavy_atoms']
+              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken', 'Number_of_C','Number_of_F','Number_of_N','Number_of_O','Number_of_H','Sum_of_heavy_atoms','possible_comb']
     
     df = df[correct_order]
 
