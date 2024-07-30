@@ -11,6 +11,13 @@ from pathlib import Path
 from scripts.params import *
 from scripts.reax_ff_data import bo
 
+with open('test_indices.json', 'r') as f:
+    test_indices = json.load(f)
+
+qm7_val = test_indices['qm7_val']
+qm8_val = test_indices['qm8_val']
+qm9_val = test_indices['qm9_val']
+
 def get_list_of_files():
     '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
     try:
@@ -127,7 +134,14 @@ def making_rgb(mat, id, label):
   pImg.save(f"{PATH}/{label}/{id}.png")
 
 def process_image(chem, bo, ds, split):
-    if random.randint(1, int(1/split)) == int(1/split):
+
+    if DB == 'qm7_demo':
+        test_set = qm7_val
+    elif DB == 'qm8_demo':
+        test_set = qm8_val
+    elif DB== 'qm9':
+        test_set = qm9_val
+    if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
         print(f"\r{chem} goes to test set", end='')
     else:
