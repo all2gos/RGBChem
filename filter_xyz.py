@@ -1,7 +1,10 @@
 import pandas as pd
 import os
 
-df = pd.read_csv(f"qm7_demo.csv")
+if DB == 'qm7_demo.csv':
+    df = pd.read_csv(f"qm7_demo.csv")
+elif DB == 'qm8_demo.csv'::
+    df = pd.read_csv(f"qm8_demo.csv")
 l = df.ID.tolist()
 
 t = [x.split('_')[1] for x in l]
@@ -18,4 +21,4 @@ for file in all_files:
         os.remove(os.path.join(directory, file))
         print(f"Removed: {file}")
 
-print("Cleanup complete.")
+print(f"Cleanup complete. Data folder now contain {len(os.listdir('data'))}")
