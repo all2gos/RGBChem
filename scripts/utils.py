@@ -45,9 +45,9 @@ def calibration(ds, d, bo):
 
     '''
 
-    if 'qm7' in DB: ds = pd.read_csv('qm7_demo.csv')
-    if 'qm8' in DB: ds = pd.read_csv('qm8_demo.csv')
-    if 'qm9' in DB: ds = pd.read_csv('qm9_demo.csv')
+    if 'qm7' in DB: ds = pd.read_csv('qm7_vanilla.csv')
+    if 'qm8' in DB: ds = pd.read_csv('qm8_vanilla.csv')
+    if 'qm9' in DB: ds = pd.read_csv('qm9_vanilla.csv')
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
