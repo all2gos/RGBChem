@@ -1,4 +1,4 @@
-import os,sys,shutil
+import os,sys,shutil, json
 import pandas as pd
 import numpy as np
 import multiprocessing
@@ -11,7 +11,7 @@ from pathlib import Path
 from scripts.params import *
 from scripts.reax_ff_data import bo
 
-with open('test_indices.json', 'r') as f:
+with open('scripts/test_indices.json', 'r') as f:
     test_indices = json.load(f)
 
 qm7_val = test_indices['qm7_val']
@@ -44,6 +44,10 @@ def calibration(ds, d, bo):
     on the entered settings contain values in the range 0-255
 
     '''
+
+    if 'qm7' in DB: ds = pd.read_csv('qm7_demo.csv')
+    if 'qm8' in DB: ds = pd.read_csv('qm8_demo.csv')
+    if 'qm9' in DB: ds = pd.read_csv('qm9_demo.csv')
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
