@@ -17,10 +17,14 @@ def extracting(f, shuffle = SHUFFLE):
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
     properties = lines[1].split("\t")
     
-    labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
-              'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
-              'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K']
+
+    if COMPRESSION == False:
+        labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
+                'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
+                'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
+                'Free energy at 298K','Heat capacity at 298K']
+    else:
+        labels = ['ID',PREDICTED_VALUE]
     
     df_record.update(zip(labels, properties))
     
@@ -102,14 +106,9 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
     df = df[df['possible_comb'] > 2*CYCLE]
     os.chdir('..')
 
-    correct_order = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
-              'Energy of LUMO','bandgap','bandgap_correct','Electronic spatial extent','Zero point vibrational energy',
-              'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-              'Free energy at 298K','Heat capacity at 298K', 'n_atoms','atom_type','cords','mulliken', 'Number_of_C','Number_of_F','Number_of_N','Number_of_O','Number_of_H','Sum_of_heavy_atoms','possible_comb']
-    
-    df = df[correct_order]
+    if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
+    if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
 
-    if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8] 
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
     print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE})')
     print(f'Database was saved as {PATH}/{DB}.csv"')
