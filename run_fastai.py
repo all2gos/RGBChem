@@ -46,11 +46,11 @@ class WaitTimeCallback(Callback):
         result = subprocess.check_output(['acpi', '-b'], text=True)
         try:
             idx = result.index('%') 
-            battery_level = int(result[idx-2:idx])
+            battery_level = int(result[idx-3:idx])
             total_seconds = (80-battery_level)*40
         except ValueError:
             print(f"Info about charge level not found")
-            total_seconds = 200
+            total_seconds = 250
 
         return battery_level, max(0,total_seconds)
 
