@@ -84,7 +84,7 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
     
     if image_type == 'A':
         r = distance(cords, n_atoms)
-        r = ionization(atom_types, n_atoms)
+        r += ionization(atom_types, n_atoms)
 
         #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
@@ -99,8 +99,39 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
         #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
     
-        b = (atomic_charge(atom_types, n_atoms))
+        #b = (atomic_charge(atom_types, n_atoms))
         b = (bond_order(distance(cords, n_atoms), atom_types, bo))
+
+
+    elif image_type == 'C':
+        r = distance(cords, n_atoms)
+        #r += ionization(atom_types, n_atoms)
+
+        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
+        #b = (atomic_charge(atom_types, n_atoms))
+        b = (bond_order(distance(cords, n_atoms), atom_types, bo))
+
+    elif image_type == 'D':
+        r = distance(cords, n_atoms)
+        #r += ionization(atom_types, n_atoms)
+
+        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
+        b = (atomic_charge(atom_types, n_atoms))
+        b += (bond_order(distance(cords, n_atoms), atom_types, bo))
+
+    elif image_type == 'E':
+        #r = distance(cords, n_atoms)
+        r = ionization(atom_types, n_atoms)
+
+        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
+    
+        b = (atomic_charge(atom_types, n_atoms))
+        #b += (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     if scaling:
         r,g,b = scale_rgb_values(r,g,b) 
