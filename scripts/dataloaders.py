@@ -14,18 +14,23 @@ from torch.utils.data import DataLoader, TensorDataset
 
 def read_files():
     '''Read the file, if file does not exist then exctract information from .tar file'''
-    try:
-        files = pd.read_csv(f'{PATH}/{DB}.csv')
-    except FileNotFoundError:
-        try:
-            making_df()
-            files=pd.read_csv(f'{PATH}/{DB}.csv')
 
-        except:
-            os.system('mkdir data')
+    db_file_exist = os.path.exists(f'{PATH}/{DB}.csv')
+    data_dir_exist = os.path.exists(f"{PATH}/data")
+
+    if not db_file_exist:
+        if not data_dir_exist:
+            os.mkdir(f"{PATH}/data")
+        images_exists = len(os.listdir(f"{PATH}/data"))>10
+        if not images_exists:
             os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
-            making_df()
-            files = pd.read_csv(f'{PATH}/{DB}.csv')         
+            #if DB in ['qm7_demo','qm8_demo']:
+            #    os.system('python filter_xyz.py')
+                
+        making_df()
+        
+    files = pd.read_csv(f'{PATH}/{DB}.csv')
+
     return files
 
 def dataloader_ffn():
