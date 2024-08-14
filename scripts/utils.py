@@ -45,9 +45,9 @@ def calibration(ds, d, bo):
 
     '''
 
-    if 'qm7' in DB: ds = pd.read_csv('qm7_vanilla.csv')
-    if 'qm8' in DB: ds = pd.read_csv('qm8_vanilla.csv')
-    if 'qm9' in DB: ds = pd.read_csv('qm9_vanilla.csv')
+    if 'qm7' == DB.split('_')[0]: ds = pd.read_csv('qm7_vanilla.csv')
+    if 'qm8' == DB.split('_')[0]: ds = pd.read_csv('qm8_vanilla.csv')
+    if 'qm9' == DB.split('_')[0]: ds = pd.read_csv('qm9_vanilla.csv')
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
@@ -145,6 +145,8 @@ def process_image(chem, bo, ds, split):
         test_set = qm8_val
     elif DB== 'qm9':
         test_set = qm9_val
+    else:
+        test_set = []
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
         print(f"\r{chem} goes to test set", end='')
@@ -154,6 +156,7 @@ def process_image(chem, bo, ds, split):
 def creating_images(start, end, bo, ds, split=0.1, step=1):
     print(f'Creating {end-start+1} images for training model')
     print(f'Rearranging train and test files')
+    
     try:
         shutil.rmtree(f'{PATH}/{TRAIN_DIR_NAME}')
         os.makedirs(f'{PATH}/{TRAIN_DIR_NAME}', exist_ok=True)
