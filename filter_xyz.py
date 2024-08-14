@@ -1,10 +1,10 @@
 import pandas as pd
 import os
-
-if DB == 'qm7_demo.csv':
-    df = pd.read_csv(f"qm7_demo.csv")
-elif DB == 'qm8_demo.csv'::
-    df = pd.read_csv(f"qm8_demo.csv")
+from scripts.params import DB
+if DB == 'qm7_demo':
+    df = pd.read_csv(f"qm7_vanilla.csv")
+elif DB == 'qm8_demo':
+    df = pd.read_csv(f"qm8_vanilla.csv")
 l = df.ID.tolist()
 
 t = [x.split('_')[1] for x in l]
