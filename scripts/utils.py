@@ -17,6 +17,10 @@ with open('scripts/test_indices.json', 'r') as f:
 qm7_val = test_indices['qm7_val']
 qm8_val = test_indices['qm8_val']
 qm9_val = test_indices['qm9_val']
+qm9_2_val = test_indices['qm9_2_val']
+qm9_3_val = test_indices['qm9_3_val']
+qm9_4_val = test_indices['qm9_4_val']
+qm9_6_val = test_indices['qm9_6_val']
 
 def get_list_of_files():
     '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
@@ -145,6 +149,14 @@ def process_image(chem, bo, ds, split):
         test_set = qm8_val
     elif DB== 'qm9':
         test_set = qm9_val
+    elif DB== 'qm9_2':
+        test_set = qm9_2_val
+    elif DB== 'qm9_3':
+        test_set = qm9_3_val
+    elif DB== 'qm9_4':
+        test_set = qm9_4_val
+    elif DB== 'qm9_6':
+        test_set = qm9_6_val
     else:
         test_set = []
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
