@@ -47,7 +47,7 @@ class WaitTimeCallback(Callback):
         try:
             idx = result.index('%') 
             battery_level = int(result[idx-3:idx])
-            total_seconds = (80-battery_level)*40
+            total_seconds = (80-battery_level)*40 if battery_level < 98 else 40
         except ValueError:
             print(f"Info about charge level not found")
             total_seconds = 250
@@ -70,7 +70,9 @@ test_dl = learn.dls.test_dl(test_data)
 preds, _ = learn.get_preds(dl=test_dl)
 
 err = []
-for idx in range(len(test_files)):
+
+
+for idx in range(1,len(test_files),CYCLE):
     print(f'\r{idx/len(test_files):.2f}',end='')
     actual = ds[PREDICTED_VALUE].loc[ds.ID == test_files[idx][:-4]].values[0]
     err.append(np.abs(preds[idx].item() - float(actual)))
