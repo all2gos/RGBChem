@@ -62,22 +62,37 @@ def extracting(f, shuffle = SHUFFLE):
     df_record['mulliken'] = mulliken
     return df_record
 
-def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
+
+def making_df(l:int=0, cycle:int=CYCLE) -> None:
     ''' Function using the extraction funcionality to create an entire database from a list of .xyz file names'''
-    df = []
     files = get_list_of_files()
-    if l==0: l=len(files) 
+    if l == 0: l = len(files)
     os.chdir(f'{PATH}/data')
     
-    #random_files = random.sample(files, l)
-    print(f'Creating a database of length {l*CYCLE}')
+    print(f'Creating a database of length {l * CYCLE}')
+    chunks = []
+    
     for idx, file in enumerate(files):
         if idx % 1000 == 0:
-            print(f'\rProgress: {(idx+883) / l*100:.2f}/100',end='')
-        df.extend(extracting(file) for _ in range(cycle))
+            print(f'\rProgress: {(idx) / l * 100:.2f}/100', end='')
+        df_chunk = pd.DataFrame([extracting(file) for _ in range(cycle)])
+        chunks.append(df_chunk)
+        
+        # Jeśli liczba danych w pamięci przekracza pewien próg, zapisz i zwolnij pamięć
+        if len(chunks) > 16000:
+            print(' Chunk created')
+            os.chdir('..')
+            pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=not os.path.exists(f"{PATH}/{DB}.csv"))
+            chunks = []
+            os.chdir(f'{PATH}/data')
 
+    # Zapisz pozostałe dane
+    if chunks:
+        pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=not os.path.exists(f"{PATH}/{DB}.csv"))
 
-    df = pd.DataFrame(data=df)
+    os.chdir('..')
+    
+    df = pd.read_csv(f'{PATH}/{DB}.csv')
 
     el = ['C','H','O','F','N']
 
@@ -104,15 +119,14 @@ def making_df(l:int=0, cycle:int=CYCLE) -> pd.DataFrame:
 
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
     df = df[df['possible_comb'] > 2*CYCLE]
-    os.chdir('..')
 
     if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
 
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
-    print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE})')
-    print(f'Database was saved as {PATH}/{DB}.csv"')
-    return df
+    print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE}). Name of db: {PATH}/{DB}.csv')
 
 if __name__ == '__main__':
     making_df()
+
+
