@@ -21,6 +21,7 @@ qm9_2_val = test_indices['qm9_2_val']
 qm9_3_val = test_indices['qm9_3_val']
 qm9_4_val = test_indices['qm9_4_val']
 qm9_6_val = test_indices['qm9_6_val']
+qm9_32_val = test_indices['qm9_32_val']
 
 def get_list_of_files():
     '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
@@ -48,7 +49,7 @@ def calibration(ds, d, bo):
     on the entered settings contain values in the range 0-255
 
     '''
-
+    
     if 'qm7' == DB.split('_')[0]: ds = pd.read_csv('qm7_vanilla.csv')
     if 'qm8' == DB.split('_')[0]: ds = pd.read_csv('qm8_vanilla.csv')
     if 'qm9' == DB.split('_')[0]: ds = pd.read_csv('qm9_vanilla.csv')
@@ -188,6 +189,8 @@ def process_image(chem, bo, ds, split):
         test_set = qm9_4_val
     elif DB== 'qm9_6':
         test_set = qm9_6_val
+    elif DB =='qm9_32':
+        test_set =qm9_32_val
     else:
         test_set = []
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
@@ -223,7 +226,7 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
     process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
 
     #multiprocessing
-    with multiprocessing.Pool() as pool:
+    with multiprocessing.Pool(processes=12) as pool:
         pool.map(process_image_partial, range(start, end+1))
 
 import matplotlib.pyplot as plt
