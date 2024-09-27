@@ -14,11 +14,13 @@ from torch.utils.data import DataLoader, TensorDataset
 
 def read_files():
     '''Read the file, if file does not exist then exctract information from .tar file'''
-    
+
+    print('reading files')
     db_file_exist = os.path.exists(f'{PATH}/{DB}.csv')
     data_dir_exist = os.path.exists(f"{PATH}/data")
 
     if data_dir_exist:
+        print(os.getcwd())
         shutil.rmtree(f"{PATH}/data") 
 
     if not db_file_exist:
@@ -110,6 +112,6 @@ def dataloader_conv(n = 0):
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 
-    return train_loader, val_loader
+    return train_loader, val_loader, raw_data
 
 
