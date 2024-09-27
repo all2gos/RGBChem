@@ -31,7 +31,8 @@ def get_list_of_files():
         os.system('mkdir data')
         os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
         files = os.listdir(f'{PATH}/data')
-    
+
+    print(len(files))
     return files
 
 r_range, g_range, b_range = (0,1),(0,1),(0,1)
@@ -134,6 +135,36 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
         b = (atomic_charge(atom_types, n_atoms))
         #b += (bond_order(distance(cords, n_atoms), atom_types, bo))
 
+    elif image_type == 'F':
+        r = distance(cords, n_atoms)
+        r += ionization(atom_types, n_atoms)
+
+        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
+    
+        b = (atomic_charge(atom_types, n_atoms))
+        #b += (bond_order(distance(cords, n_atoms), atom_types, bo))
+
+    elif image_type == 'G':
+        r = distance(cords, n_atoms)
+        #r += ionization(atom_types, n_atoms)
+
+        g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g += coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
+        b = (atomic_charge(atom_types, n_atoms))
+        b += (bond_order(distance(cords, n_atoms), atom_types, bo))
+
+    elif image_type == 'H':
+        r = distance(cords, n_atoms)
+        r += ionization(atom_types, n_atoms)
+
+        g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
+        g += coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
+    
+        b = (atomic_charge(atom_types, n_atoms))
+        b += (bond_order(distance(cords, n_atoms), atom_types, bo))
+
     if scaling:
         r,g,b = scale_rgb_values(r,g,b) 
 
@@ -193,7 +224,10 @@ def process_image(chem, bo, ds, split):
         test_set =qm9_32_val
     else:
         test_set = []
+
+    control_test_size = max(1,int(len(test_set)/13_000))
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
+        #if random.randint(1, control_test_size)==1:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
         print(f"\r{chem} goes to test set", end='')
     else:
@@ -221,14 +255,19 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
         print(f'Calibration for each spectra (based on {len(ds)/step/len(ds)*100:.2f}% of data):')
         r_range, g_range, b_range = calibration(ds,step,bo)
     
-    print(f'Creating images, this process may take a lot of time')
+    #print(f'Creating images, this process may take a lot of time')
     #partial function
     process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
 
     #multiprocessing
-    with multiprocessing.Pool(processes=12) as pool:
-        pool.map(process_image_partial, range(start, end+1))
+    #with multiprocessing.Pool(processes=4) as pool:
+    #    pool.map(process_image_partial, range(start, end+1))
 
+    #singleprocessing
+    for chem in range(start, end+1):
+        print(f"\r{chem}/{end+1}",end='')
+        process_image(chem, bo=bo, ds=ds, split=split)
+    print('Creating images have been finished')
 import matplotlib.pyplot as plt
 
 def p(num_epochs, losses, accuracies):
