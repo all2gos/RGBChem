@@ -78,7 +78,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
         df_chunk = pd.DataFrame([extracting(file) for _ in range(cycle)])
         chunks.append(df_chunk)
         
-        # Jeśli liczba danych w pamięci przekracza pewien próg, zapisz i zwolnij pamięć
+        #dividing into chunk procedure
         if len(chunks) > 16000:
             print(' Chunk created')
             os.chdir('..')
@@ -86,13 +86,17 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
             chunks = []
             os.chdir(f'{PATH}/data')
 
-    # Zapisz pozostałe dane
+
     if chunks:
         pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=not os.path.exists(f"{PATH}/{DB}.csv"))
 
+
+
     os.chdir('..')
-    
+
+    print('Reading df')
     df = pd.read_csv(f'{PATH}/{DB}.csv')
+    print(f'Len of df:{len(df)}')
 
     el = ['C','H','O','F','N']
 
