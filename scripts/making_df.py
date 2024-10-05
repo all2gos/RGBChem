@@ -3,7 +3,6 @@ import pandas as pd
 import os, sys
 from scipy.special import factorial
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from scripts.params import *
@@ -16,7 +15,6 @@ def extracting(f, shuffle = SHUFFLE):
 
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
     properties = lines[1].split("\t")
-    
 
     if COMPRESSION == False:
         labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
@@ -115,7 +113,6 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     ''' Function using the extraction funcionality to create an entire database from a list of .xyz file names'''
     files = get_list_of_files()
     print(f"Program found {len(files)} files in data directory")
-    print(f'TMP: {files}')
     if l == 0: l = len(files)
     os.chdir(f'{PATH}/data')
     
@@ -148,7 +145,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     df = pd.read_csv(f'{PATH}/{DB}.csv')
     print(f'Len of df:{len(df)}')
 
-    el = ['C','H','O','F','N']
+    el = ['C', 'O', 'N', 'F', 'H']
 
     def count_(l, element):
         return l.count(element)
@@ -176,7 +173,6 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
 
     if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
-
 
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
     os.system(f'mv {os.path.join(PATH, f"{DB}.csv")} ../{DB}.csv')
