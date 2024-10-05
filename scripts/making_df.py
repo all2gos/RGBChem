@@ -3,7 +3,6 @@ import pandas as pd
 import os, sys
 from scipy.special import factorial
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from scripts.params import *
@@ -16,7 +15,6 @@ def extracting(f, shuffle = SHUFFLE):
 
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
     properties = lines[1].split("\t")
-    
 
     if COMPRESSION == False:
         labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
@@ -36,26 +34,74 @@ def extracting(f, shuffle = SHUFFLE):
         cords.append(atom_record[1:-1])
         mulliken.append(atom_record[-1])
 
-    p = df_record['n_atoms'] - atom_type.count('H')
-    '''If shuffle = full or partial then the order of atoms in the molecule is randomized'''
-    if shuffle == 'full':
+    
+    #ensuring that atoms are writen in .xyz in correct order
+    order_of_atoms = {'C': 0, 'O': 1, 'N': 2, 'F': 3, 'H': 4}
+    indices = sorted(range(len(atom_type)), key=lambda i: order_of_atoms[atom_type[i]])
+    atom_type= [atom_type[i] for i in indices]
+    cords = [cords[i] for i in indices]
+    mulliken = [mulliken[i] for i in indices]
+
+
+    def shuffle_atoms(atom_type, cords, mulliken, indices):
         combined = list(zip(atom_type, cords, mulliken))
-        random.shuffle(combined)
-        atom_type, cords, mulliken = zip(*combined)
+        random.shuffle(indices)
+        shuffled = [combined[i] for i in indices]
+        return zip(*shuffled)
+    
+    if shuffle == 'full':
+        indices = list(range(len(atom_type)))  # full randomness
+        atom_type, cords, mulliken = shuffle_atoms(atom_type, cords, mulliken, indices)
+    
     elif shuffle == 'partial':
-        heavy_atoms = list(zip(atom_type[:p], cords[:p],mulliken[:p]))
-        hydrogen = list(zip(atom_type[p:],cords[p:],mulliken[p:]))
+        '''Random selection beetwen two groups: CONF and H'''
+        heavy_atoms = []
+        hydrogen_atoms = []
+
+        for i, atom in enumerate(atom_type):
+            if atom == 'H':
+                hydrogen_atoms.append((atom_type[i], cords[i], mulliken[i]))
+            else:
+                heavy_atoms.append((atom_type[i], cords[i], mulliken[i]))
+
         random.shuffle(heavy_atoms)
-        random.shuffle(hydrogen)
+        random.shuffle(hydrogen_atoms)
 
-        atom_type_heavy, cords_heavy, mulliken_heavy = zip(*heavy_atoms) 
+        atom_type = []
+        cords = []
+        mulliken = []
 
-        if len(hydrogen) != 0:
-            atom_type_h, cords_h, mulliken_h = zip(*hydrogen)
+        for at, crd, mul in heavy_atoms:
+            atom_type.append(at)
+            cords.append(crd)
+            mulliken.append(mul)
 
-            atom_type, cords, mulliken = atom_type_heavy+atom_type_h, cords_heavy+cords_h, mulliken_heavy+mulliken_h
-        else:
-            atom_type, cords, mulliken = atom_type_heavy, cords_heavy, mulliken_heavy
+        for at, crd, mul in hydrogen_atoms:
+            atom_type.append(at)
+            cords.append(crd)
+            mulliken.append(mul)
+
+    elif shuffle == 'groups':
+        '''Shuffling every type of atom separately'''
+        atom_groups = {'C': [], 'O': [], 'N': [], 'F': [], 'H': []}
+        
+        for i, atom in enumerate(atom_type):
+            atom_groups[atom].append((atom_type[i], cords[i], mulliken[i]))
+        
+        for atom in atom_groups:
+            random.shuffle(atom_groups[atom])
+        
+        atom_type = []
+        cords = []
+        mulliken = []
+        
+        for atom in ['C', 'O', 'N', 'F', 'H']:
+            group = atom_groups[atom]
+            for at, crd, mul in group:
+                atom_type.append(at)
+                cords.append(crd)
+                mulliken.append(mul)
+
     '''Putting all together'''
     df_record['atom_type'] = atom_type
     df_record['cords'] = cords
@@ -66,6 +112,7 @@ def extracting(f, shuffle = SHUFFLE):
 def making_df(l:int=0, cycle:int=CYCLE) -> None:
     ''' Function using the extraction funcionality to create an entire database from a list of .xyz file names'''
     files = get_list_of_files()
+    print(f"Program found {len(files)} files in data directory")
     if l == 0: l = len(files)
     os.chdir(f'{PATH}/data')
     
@@ -82,23 +129,23 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
         if len(chunks) > 16000:
             print(' Chunk created')
             os.chdir('..')
-            pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=not os.path.exists(f"{PATH}/{DB}.csv"))
+            file_exists = os.path.exists(f"{PATH}/{DB}.csv")
+            pd.concat(chunks).to_csv(f"../{DB}.csv", mode='a', header=not file_exists)
             chunks = []
             os.chdir(f'{PATH}/data')
 
 
     if chunks:
-        pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=not os.path.exists(f"{PATH}/{DB}.csv"))
-
-
+        file_exists = os.path.exists(f"{PATH}/{DB}.csv")
+        pd.concat(chunks).to_csv(f"../{DB}.csv", mode='a', header=not file_exists)
 
     os.chdir('..')
 
-    print('Reading df')
+    print('\nReading df')
     df = pd.read_csv(f'{PATH}/{DB}.csv')
     print(f'Len of df:{len(df)}')
 
-    el = ['C','H','O','F','N']
+    el = ['C', 'O', 'N', 'F', 'H']
 
     def count_(l, element):
         return l.count(element)
@@ -128,6 +175,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
 
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
+    os.system(f'mv {os.path.join(PATH, f"{DB}.csv")} ../{DB}.csv')
     print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE}). Name of db: {PATH}/{DB}.csv')
 
 if __name__ == '__main__':

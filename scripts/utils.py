@@ -32,19 +32,18 @@ def get_list_of_files():
         os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
         files = os.listdir(f'{PATH}/data')
 
-    print(len(files))
     return files
 
 r_range, g_range, b_range = (0,1),(0,1),(0,1)
 def scale_rgb_values(r, g, b):
     global r_range, g_range, b_range
+
     r = (255 * (r - r_range[0]) / (r_range[1] - r_range[0])).astype(int)
     g = (255 * (g - g_range[0]) / (g_range[1] - g_range[0])).astype(int)
     b = (255 * (b - b_range[0]) / (b_range[1] - b_range[0])).astype(int)
-
     return r, g, b
 
-def calibration(ds, d, bo):
+def calibration(ds, STEP, bo):
 
     '''A function that checks whether the matrices generated 
     on the entered settings contain values in the range 0-255
@@ -57,7 +56,7 @@ def calibration(ds, d, bo):
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
-    for compound in range(start, len(ds), d): #step != 1 to avoid too long execution
+    for compound in range(start, len(ds), STEP): #step != 1 to avoid too long execution
         data.append(making_rgb_numerically(compound, bo, ds, scaling=False))
         print(f'\rCalibration: {100*compound/len(ds):.2f}%', end='')
 
@@ -176,9 +175,9 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
         init_cords = (0,0)
 
     if MARGIN == 'black':
-        value_r, value_g, value_b=0
+        value_r, value_g, value_b=0,0,0
     elif MARGIN=='white':
-        value_r, value_g, value_b=255
+        value_r, value_g, value_b=255,255,255 #calibration does not work well
     elif MARGIN=='avg':
         value_r, value_g, value_b = np.mean(r), np.mean(g), np.mean(b)
     
@@ -233,7 +232,7 @@ def process_image(chem, bo, ds, split):
     else:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
-def creating_images(start, end, bo, ds, split=0.1, step=1):
+def creating_images(start, end, bo, ds, STEP, split=0.1):
     print(f'Creating {end-start+1} images for training model')
     print(f'Rearranging train and test files')
     
@@ -250,10 +249,9 @@ def creating_images(start, end, bo, ds, split=0.1, step=1):
         os.makedirs(f'{PATH}/{TEST_DIR_NAME}', exist_ok=True)
     
     if SCALING==True:
-        step = 30
         global r_range, g_range, b_range
-        print(f'Calibration for each spectra (based on {len(ds)/step/len(ds)*100:.2f}% of data):')
-        r_range, g_range, b_range = calibration(ds,step,bo)
+        print(f'Calibration for each spectra (based on {len(ds)/STEP/len(ds)*100:.2f}% of data):')
+        r_range, g_range, b_range = calibration(ds,STEP,bo)
     
     #print(f'Creating images, this process may take a lot of time')
     #partial function
