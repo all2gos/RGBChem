@@ -130,17 +130,14 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
             print(' Chunk created')
             os.chdir('..')
             file_exists = os.path.exists(f"{PATH}/{DB}.csv")
-            pd.concat(chunks).to_csv(f"../{DB}.csv", mode='a', header=not file_exists)
+            pd.concat(chunks).to_csv(f"{DB}.csv", mode='a', header=not file_exists)
             chunks = []
             os.chdir(f'{PATH}/data')
 
 
     if chunks:
         file_exists = os.path.exists(f"{PATH}/{DB}.csv")
-        pd.concat(chunks).to_csv(f"../{DB}.csv", mode='a', header=not file_exists)
-
-    os.chdir('..')
-
+        pd.concat(chunks).to_csv(f"{DB}.csv", mode='a', header=not file_exists)
     print('\nReading df')
     df = pd.read_csv(f'{PATH}/{DB}.csv')
     print(f'Len of df:{len(df)}')
@@ -169,7 +166,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     df['bandgap'] = df['bandgap'].astype('float32')
 
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
-    df = df[df['possible_comb'] > 2*CYCLE]
+    #df = df[df['possible_comb'] > 2*CYCLE]
 
     if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
