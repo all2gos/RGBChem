@@ -10,8 +10,9 @@ import subprocess
 #this function perform database creation, .png files creation and DataLoader and Dataset PyTorch object creation. Moreover it is possible to create
 #a fastai workflow build on that components which we will show you in this demo.
 
-dl = dataloader_conv()
+dataloader_conv()
 ds = pd.read_csv(f'{PATH}/{DB}.csv')
+
 
 def get_list(path):
     l = []
@@ -59,7 +60,10 @@ class WaitTimeCallback(Callback):
         print(f'Dealing with Battery level: charge level: {info[0]}. Waiting for {info[1]} seconds...')
         time.sleep(info[1])
 
-learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
+if BATTERY_LEVEL_CONTROL:
+    learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
+else:
+    learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
 learn.export(f"{PATH}/{LOG_FILE.replace('.log','_fastai.pkl')}")
 
 print('Validation...')
