@@ -50,9 +50,9 @@ def calibration(ds, STEP, bo):
 
     '''
     
-    if 'qm7' == DB.split('_')[0]: ds = pd.read_csv('qm7_vanilla.csv')
-    if 'qm8' == DB.split('_')[0]: ds = pd.read_csv('qm8_vanilla.csv')
-    if 'qm9' == DB.split('_')[0]: ds = pd.read_csv('qm9_vanilla.csv')
+    if 'qm7' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm7_vanilla.csv')
+    if 'qm8' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm8_vanilla.csv')
+    if 'qm9' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm9_vanilla.csv')
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
@@ -253,39 +253,20 @@ def creating_images(start, end, bo, ds, STEP, split=0.1):
         print(f'Calibration for each spectra (based on {len(ds)/STEP/len(ds)*100:.2f}% of data):')
         r_range, g_range, b_range = calibration(ds,STEP,bo)
     
-    #print(f'Creating images, this process may take a lot of time')
-    #partial function
-    process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
+    print(f'Creating images, this process may take a lot of time')
 
-    #multiprocessing
-    #with multiprocessing.Pool(processes=4) as pool:
-    #    pool.map(process_image_partial, range(start, end+1))
+    if MULTIPROCESS:
+        process_image_partial = partial(process_image, bo=bo, ds=ds, split=split)
 
-    #singleprocessing
-    for chem in range(start, end+1):
-        print(f"\r{chem}/{end+1}",end='')
-        process_image(chem, bo=bo, ds=ds, split=split)
+        #multiprocessing
+        print(f'Running with multiprocessing using {NUM_PROC} processes')
+        with multiprocessing.Pool(processes=NUM_PROC) as pool:
+            pool.map(process_image_partial, range(start, end+1))
+    else:
+        #singleprocessing
+        print(f'Running without multiprocessing')
+        for chem in range(start, end+1):
+            print(f"\r{chem}/{end+1}",end='')
+            process_image(chem, bo=bo, ds=ds, split=split)
     print('Creating images have been finished')
-import matplotlib.pyplot as plt
 
-def p(num_epochs, losses, accuracies):
-  ''' Function to plot change in loss and accuracy values while training the model '''
-  x = range(num_epochs)[2:]
-
-  fig, ax1 = plt.subplots()
-
-  losses = [1/x for x in losses]
-  color = 'tab:blue'
-  ax1.set_xlabel('Epochs')
-  ax1.set_ylabel('loss', color=color)
-  ax1.plot(x, losses[2:], color=color)
-  ax1.tick_params(axis='y', labelcolor=color)
-
-  ax2 = ax1.twinx()  
-  color = 'tab:red'
-  ax2.set_ylabel('accuracy', color=color)
-  ax2.plot(x, accuracies[2:], color=color)
-  ax2.tick_params(axis='y', labelcolor=color)
-
-  plt.title('Loss and accuracy[meV] value')
-  plt.show()
