@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import os, shutil
 import torch 
+from torchvision.datasets import ImageFolder
+from torchvision import transforms
+from PIL import Image
 
 from .reax_ff_data import bo
 from scripts.making_df import *
@@ -36,41 +39,6 @@ def read_files():
 
     return files
   
-def dataloader_ffn():
-    raw_data = read_files()
-
-    n=len(raw_data) -1
-    def creating_images(start, end, bo, ds, step=1):
-        l = np.empty((0, 32*32*3 + 1))
-        for chem in range(start, end+1, step):
-            print(f'\rCreating dataset:{chem/n*100:.2f}%',end='')
-            flatten = making_rgb_numerically(chem, bo, ds, scaling=False)
-            fl = np.hstack(flatten).reshape(-1, 1)
-            fl = np.append(fl, ds[PREDICTED_VALUE].iloc[chem])
-            l = np.append(l, [fl], axis=0)
-        return l
-
-    def create_dataloader(X, y, batch_size=BATCH_SIZE):
-        X_tensor = torch.tensor(X, dtype=torch.float32)
-        y_tensor = torch.tensor(y, dtype=torch.float32)
-        dataset = TensorDataset(X_tensor, y_tensor)
-        return DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    
-    matrix = creating_images(0, n, bo, raw_data)
-    training_volume = int(len(matrix) * TRAIN_TEST_SPLIT)
-
-    X_train, y_train = matrix[:training_volume, :-1], matrix[:training_volume, -1]
-    X_test, y_test = matrix[training_volume:, :-1], matrix[training_volume:, -1]
-
-    train_loader = create_dataloader(X_train, y_train)
-    val_loader = create_dataloader(X_test, y_test)
-
-    return train_loader, val_loader
-
-from torchvision.datasets import ImageFolder
-from torchvision import transforms
-from PIL import Image
-
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, transform=None):
         self.transform = transform
