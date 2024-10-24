@@ -3,16 +3,29 @@ from scripts.dataloaders import dataloader_conv
 from scripts.params import *
 from fastai.vision.all import *
 from scripts.params import *
+from scripts.qm_vanilla_handling import create_qm_vanilla_file
 import torch
 import time
 import subprocess
 import os
+import random
 
 #this function perform database creation, .png files creation and DataLoader and Dataset PyTorch object creation. Moreover it is possible to create
 #a fastai workflow build on that components which we will show you in this demo.
 
 dataloader_conv()
 ds = pd.read_csv(f'{PATH}/{DB}.csv')
+
+create_qm_vanilla_file() #if qm_vanilla.csv not in directory then this function will create it
+
+def move_one_image_to_the_outside():
+    '''Function that after training procedure choose one .png and move it to the external file'''
+
+    img_list= os.listdir(f"{PATH}/train")
+    img_name = img_list[random.randint(1,len(img_list))]
+
+    os.system(f"mv {PATH}/train/{img_name} {PATH}")
+    print(f'File {img_name} have been successfully moved to {PATH}')
 
 
 def get_list(path):
@@ -54,10 +67,10 @@ class WaitTimeCallback(Callback):
         try:
             idx = result.index('%') 
             battery_level = int(result[idx-3:idx])
-            total_seconds = (80-battery_level)*40 if battery_level < 98 else 40
+            total_seconds = (80-battery_level)*40 if battery_level < 98 else 20
         except ValueError:
             print(f"Info about charge level not found")
-            total_seconds = 250
+            total_seconds = 30
 
         return battery_level, max(0,total_seconds)
 
@@ -72,6 +85,7 @@ else:
     learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
 learn.export(f"{PATH}/{LOG_FILE.replace('.log','_fastai.pkl')}")
 
+move_one_image_to_the_outside()
 print('Validation...')
 
 test_files = os.listdir(f"{PATH}/{TEST_DIR_NAME}")
@@ -88,7 +102,7 @@ for idx in range(1,len(test_files),max(CYCLE-1,1)):
     err.append(np.abs(preds[idx].item() - float(actual)))
 
 print(f"\n Average prediction error on test set: {sum(err)/len(err)*27211:.2f} meV")
-os.chdir('..')
+os.chdir(f'{PATH}')
 print(f"Creating a log file {LOG_FILE} in {os.getcwd()} location")
 with open(LOG_FILE, 'w+') as file:
 
