@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
 from scripts.utils import get_list_of_files
 
+
 def extracting(f, shuffle = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
     with open(f, 'r') as file:
@@ -16,13 +17,10 @@ def extracting(f, shuffle = SHUFFLE):
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
     properties = lines[1].split("\t")
 
-    if COMPRESSION == False:
-        labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
-                'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
-                'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
-                'Free energy at 298K','Heat capacity at 298K']
-    else:
-        labels = ['ID',PREDICTED_VALUE]
+    labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
+             'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
+             'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
+             'Free energy at 298K','Heat capacity at 298K']
     
     df_record.update(zip(labels, properties))
     
@@ -33,7 +31,6 @@ def extracting(f, shuffle = SHUFFLE):
         atom_type.append(atom_record[0])
         cords.append(atom_record[1:-1])
         mulliken.append(atom_record[-1])
-
     
     #ensuring that atoms are writen in .xyz in correct order
     order_of_atoms = {'C': 0, 'O': 1, 'N': 2, 'F': 3, 'H': 4}
@@ -41,7 +38,6 @@ def extracting(f, shuffle = SHUFFLE):
     atom_type= [atom_type[i] for i in indices]
     cords = [cords[i] for i in indices]
     mulliken = [mulliken[i] for i in indices]
-
 
     def shuffle_atoms(atom_type, cords, mulliken, indices):
         combined = list(zip(atom_type, cords, mulliken))
@@ -112,36 +108,46 @@ def extracting(f, shuffle = SHUFFLE):
 def making_df(l:int=0, cycle:int=CYCLE) -> None:
     ''' Function using the extraction funcionality to create an entire database from a list of .xyz file names'''
     files = get_list_of_files()
+    
+    files = [item for item in files if '.xyz' in item]
+        
     print(f"Program found {len(files)} files in data directory")
     if l == 0: l = len(files)
     os.chdir(f'{PATH}/data')
     
     print(f'Creating a database of length {l * CYCLE}')
     chunks = []
-    
+    header_bool = True
     for idx, file in enumerate(files):
-        if idx % 1000 == 0:
-            print(f'\rProgress: {(idx) / l * 100:.2f}/100', end='')
+        print(f'\rProgress: {(idx) / l * 100:.2f}/100', end='')
         df_chunk = pd.DataFrame([extracting(file) for _ in range(cycle)])
+        if idx == 1:
+            pass
+            #columns_ = df_chunk.columns
         chunks.append(df_chunk)
         
         #dividing into chunk procedure
-        if len(chunks) > 16000:
+        if len(chunks) > 364000-1:
             print(' Chunk created')
             os.chdir('..')
-            file_exists = os.path.exists(f"{PATH}/{DB}.csv")
-            pd.concat(chunks).to_csv(f"{DB}.csv", mode='a', header=not file_exists)
+            pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=header_bool, index=False)
+            if header_bool == True:
+                header_bool = False
+            df = pd.read_csv(f"{PATH}/{DB}.csv")
+            print(f"Current len of db: {len(df)}")
             chunks = []
             os.chdir(f'{PATH}/data')
 
-
     if chunks:
-        file_exists = os.path.exists(f"{PATH}/{DB}.csv")
-        pd.concat(chunks).to_csv(f"{DB}.csv", mode='a', header=not file_exists)
+        pd.concat(chunks).to_csv(f"{PATH}/{DB}.csv", mode='a', header=header_bool, index=False)
+        
+    
     print('\nReading df')
     df = pd.read_csv(f'{PATH}/{DB}.csv')
     print(f'Len of df:{len(df)}')
+    #df.columns = columns_
 
+    #counting the atoms 
     el = ['C', 'O', 'N', 'F', 'H']
 
     def count_(l, element):
@@ -151,8 +157,17 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
         df[f'Number_of_{atom}'] = df.atom_type.apply(lambda x: count_(x, atom))
         
     df['Sum_of_heavy_atoms'] = df['Number_of_C'] + df['Number_of_F'] + df['Number_of_N'] + df['Number_of_O']
-    df['possible_comb'] = factorial(df['Sum_of_heavy_atoms']) * factorial(df['Number_of_H'])
 
+
+    #possible comb column creation
+    if SHUFFLE == 'none':
+        df['possible_comb'] = 1
+    elif SHUFFLE == 'partial':
+        df['possible_comb'] = factorial(df['Sum_of_heavy_atoms']) * factorial(df['Number_of_H'])
+    elif SHUFFLE == 'groups':
+        df['possible_comb'] = factorial(df['Number_of_C'])*factorial(df['Number_of_F'])*factorial(df['Number_of_N'])*factorial(df['Number_of_O'])*factorial(df['Number_of_H']) 
+
+    #modify the ID column to avoid overwriting rows in case on CYCLE > 1
     def transform_id(row):
         id_parts = row['ID'].split(" ")
         id_num = id_parts[1]
@@ -161,18 +176,18 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
 
     df['ID'] = df.apply(transform_id, axis=1)
 
+    #bandgap rename and transform date type
     df.rename(columns={'HOMO-LUMO Gap': 'bandgap'}, inplace=True)
 
     df['bandgap'] = df['bandgap'].astype('float32')
-
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
-    #df = df[df['possible_comb'] > 2*CYCLE]
 
+    #optional filtering
     if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
 
+    #final saving
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
-    os.system(f'mv {os.path.join(PATH, f"{DB}.csv")} ../{DB}.csv')
     print(f'\nDatabase of lenght {len(df)} was successfully created based on {len(files)} files (Shuffle: {SHUFFLE}, number of data point per molecule: {CYCLE}). Name of db: {PATH}/{DB}.csv')
 
 if __name__ == '__main__':
