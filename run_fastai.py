@@ -6,6 +6,7 @@ from scripts.params import *
 import torch
 import time
 import subprocess
+import os
 
 #this function perform database creation, .png files creation and DataLoader and Dataset PyTorch object creation. Moreover it is possible to create
 #a fastai workflow build on that components which we will show you in this demo.
@@ -33,12 +34,17 @@ f = [x[:-4] for x in f]
 filtered = ds[ds.ID.isin(f)]
 print(f'{len(filtered)} out of {len(ds)} samples were selected')
 
-dblock = DataBlock(blocks=(ImageBlock, RegressionBlock),
+if RESIZE != 0:
+    dblock = DataBlock(blocks=(ImageBlock, RegressionBlock),
+                       get_x=get_x, get_y=get_y,
+                       splitter=RandomSplitter(valid_pct=0.1, seed=42),
+                       item_tfms = Resize(RESIZE)).dataloaders(filtered, bs=BATCH_SIZE)
+else:
+    dblock = DataBlock(blocks=(ImageBlock, RegressionBlock),
                    get_x=get_x, get_y=get_y,
-                   splitter=RandomSplitter(valid_pct=0.1, seed=42),
-                   item_tfms = Resize(RESIZE)).dataloaders(filtered, bs=BATCH_SIZE)
+                   splitter=RandomSplitter(valid_pct=0.1, seed=42)).dataloaders(filtered, bs=BATCH_SIZE)
 
-learn = vision_learner(dblock, resnet18, metrics=mae, lr=LEARNING_RATE)
+learn = vision_learner(dblock, eval(MODEL), metrics=mae, lr=LEARNING_RATE)
 saving_callbacks = SaveModelCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, fname=f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai')}")
 early_stopping_cb = EarlyStoppingCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, patience=PATIENCE)
 
@@ -82,7 +88,8 @@ for idx in range(1,len(test_files),max(CYCLE-1,1)):
     err.append(np.abs(preds[idx].item() - float(actual)))
 
 print(f"\n Average prediction error on test set: {sum(err)/len(err)*27211:.2f} meV")
-
+os.chdir('..')
+print(f"Creating a log file {LOG_FILE} in {os.getcwd()} location")
 with open(LOG_FILE, 'w+') as file:
 
     print(f"\n Average prediction error on test set: {sum(err)/len(err)*27211:.2f} meV", file=file)    
