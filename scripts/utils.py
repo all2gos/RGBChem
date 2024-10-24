@@ -1,9 +1,10 @@
-import os,sys,shutil, json, random, multiprocessing
+import os,sys,shutil, json, random, multiprocessing, re
 import pandas as pd
 import numpy as np
 from functools import partial
 from PIL import Image
 from pathlib import Path
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
@@ -270,9 +271,23 @@ def creating_images(start, end, bo, ds, STEP, split=0.1):
             pool.map(process_image_partial, range(start, end+1))
     else:
         #singleprocessing
-        print(f'Running without multiprocessing')
+        print('Running without multiprocessing')
         for chem in range(start, end+1):
             print(f"\r{chem}/{end+1}",end='')
             process_image(chem, bo=bo, ds=ds, split=split)
     print('Creating images have been finished')
 
+def modify_params(changes):
+    '''Function which modify params in scripts/params.py file
+    Changes is a directory with new values of param e.g. {'CYCLE':4}'''
+    with open('scripts/params.py', 'r') as file:
+        content = file.read()
+
+    for param, value in changes.items():
+        if isinstance(value, str):
+            value = f"'{value}'"
+        content = re.sub(f'{param} = .*', f'{param} = {value}', content)
+
+
+    with open('scripts/params.py', 'w') as file:
+        file.write(content)
