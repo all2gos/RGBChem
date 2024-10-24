@@ -1,14 +1,13 @@
-import os,sys,shutil, json
+import os,sys,shutil, json, random, multiprocessing
 import pandas as pd
 import numpy as np
-import multiprocessing
 from functools import partial
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.matrix_function import *
 from PIL import Image
-import random
 from pathlib import Path
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
+from scripts.matrix_function import *
 from scripts.reax_ff_data import bo
 
 with open('scripts/test_indices.json', 'r') as f:
@@ -17,11 +16,17 @@ with open('scripts/test_indices.json', 'r') as f:
 qm7_val = test_indices['qm7_val']
 qm8_val = test_indices['qm8_val']
 qm9_val = test_indices['qm9_val']
-qm9_2_val = test_indices['qm9_2_val']
-qm9_3_val = test_indices['qm9_3_val']
-qm9_4_val = test_indices['qm9_4_val']
-qm9_6_val = test_indices['qm9_6_val']
-qm9_32_val = test_indices['qm9_32_val']
+#qm9_2_val = test_indices['qm9_2_val']
+#qm9_3_val = test_indices['qm9_3_val']
+#qm9_4_val = test_indices['qm9_4_val']
+#qm9_6_val = test_indices['qm9_6_val']
+#qm9_32_val = test_indices['qm9_32_val']
+
+qm9_train = test_indices['qm9_train']
+qm9_2_train = test_indices['qm9_2_train']
+qm9_3_train = test_indices['qm9_3_train']
+qm9_4_train = test_indices['qm9_4_train']
+qm9_6_train = test_indices['qm9_6_train']
 
 def get_list_of_files():
     '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
@@ -205,31 +210,32 @@ def making_rgb(mat, id, label):
 
 def process_image(chem, bo, ds, split):
 
+    #test set
     if DB == 'qm7_demo':
         test_set = qm7_val
     elif DB == 'qm8_demo':
         test_set = qm8_val
-    elif DB== 'qm9':
+    elif DB.split('_')[0] == 'qm9':
         test_set = qm9_val
-    elif DB== 'qm9_2':
-        test_set = qm9_2_val
-    elif DB== 'qm9_3':
-        test_set = qm9_3_val
-    elif DB== 'qm9_4':
-        test_set = qm9_4_val
-    elif DB== 'qm9_6':
-        test_set = qm9_6_val
-    elif DB =='qm9_32':
-        test_set =qm9_32_val
     else:
         test_set = []
 
-    control_test_size = max(1,int(len(test_set)/13_000))
+    #train set
+    if DB == 'qm9_2':
+        train_set = qm9_2_train
+    elif DB == 'qm9_3':
+        train_set = qm9_3_train
+    elif DB == 'qm9_4':
+        train_set = qm9_4_train
+    elif DB == 'qm9_6':
+        train_set = qm9_6_train
+    else:
+        train_set = qm9_train
+
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
-        #if random.randint(1, control_test_size)==1:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
         print(f"\r{chem} goes to test set", end='')
-    else:
+    elif int(ds.ID.iloc[chem].split('_')[1]) in train_set:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
 def creating_images(start, end, bo, ds, STEP, split=0.1):
