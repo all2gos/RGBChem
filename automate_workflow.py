@@ -4,21 +4,10 @@ import datetime
 import importlib
 import scripts.params as params_module 
 from scripts.params import PATH
+from scripts.utils import modify_params
 
 
-def modify_params(changes):
-    with open('scripts/params.py', 'r') as file:
-        content = file.read()
-
-    for param, value in changes.items():
-        if isinstance(value, str):
-            value = f"'{value}'"
-        content = re.sub(f'{param} = .*', f'{param} = {value}', content)
-
-
-    with open('scripts/params.py', 'w') as file:
-        file.write(content)
-
+#delete existing .csv file with corresponding names
 def remove_csv(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -26,12 +15,13 @@ def remove_csv(file_path):
     else:
         print(f'{file_path} does not exist.')
 
+#remove train, test and data files
 def remove_dir(directory):
     if os.path.isdir(directory):
         shutil.rmtree(directory)
         print(f"Directory {directory} have been removed.")
-        
-# 3. Uruchomienie pliku run_fastai.py
+
+#running run_fastai
 def run_script():
     os.system(f'nohup python run_fastai.py > {datetime.datetime.now().strftime("%H_%M_%d_%m_%Y")}.log')
 
@@ -72,7 +62,7 @@ if __name__ == "__main__":
         os.chdir(PATH)
         modify_params(get_random_params())
         importlib.reload(params_module)
-        csv_file = f'{params_module.DB}.csv'
+        csv_file = f'{params_module.PATH}/{params_module.DB}.csv'
         remove_csv(csv_file)
         remove_dir('data')
         remove_dir('test')
