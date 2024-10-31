@@ -19,6 +19,11 @@ def training_workflow():
 
     create_qm_vanilla_file() #if qm_vanilla.csv not in directory then this function will create it
 
+    from scripts.params import __all__
+    print(f"All params list")
+    for name in __all__:
+        print(f"{name} = {globals()[name]}")
+
     def move_one_image_to_the_outside():
         '''Function that after training procedure choose one .png and move it to the external file'''
 
@@ -68,7 +73,7 @@ def training_workflow():
             try:
                 idx = result.index('%') 
                 battery_level = int(result[idx-3:idx])
-                total_seconds = (80-battery_level)*40 if battery_level < 98 else 20
+                total_seconds = (80-battery_level)*40 if battery_level < 95 else 20
             except ValueError:
                 print(f"Info about charge level not found")
                 total_seconds = 30
@@ -84,7 +89,7 @@ def training_workflow():
         learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
     else:
         learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
-    learn.export(f"{PATH}/{LOG_FILE.replace('.log','_fastai.pkl')}")
+#    learn.export(f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai.pth')}")
 
     move_one_image_to_the_outside()
     print('Validation...')
@@ -98,7 +103,7 @@ def training_workflow():
 
 
     for idx in range(1,len(test_files),max(CYCLE-1,1)):
-        print(f'\r{idx/len(test_files):.2f}',end='')
+        print(f'\r{100*idx/len(test_files):.2f}',end='')
         actual = ds[PREDICTED_VALUE].loc[ds.ID == test_files[idx][:-4]].values[0]
         err.append(np.abs(preds[idx].item() - float(actual)))
 
