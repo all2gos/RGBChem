@@ -275,7 +275,7 @@ def creating_images(start, end, bo, ds, STEP, split=0.1):
         for chem in range(start, end+1):
             print(f"\r{chem}/{end+1}",end='')
             process_image(chem, bo=bo, ds=ds, split=split)
-    print('Creating images have been finished')
+    print(f'Creating images have been finished. There are {len(os.listdir(f'{PATH}/{TRAIN_DIR_NAME}'))} files in {TRAIN_DIR_NAME} directory and {len(os.listdir(f'{PATH}/{TEST_DIR_NAME}'))} in {TEST_DIR_NAME} directory.')
 
 def modify_params(changes):
     '''Function which modify params in scripts/params.py file
