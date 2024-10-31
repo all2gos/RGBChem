@@ -27,30 +27,39 @@ def run_script():
 
 def get_random_params():
     DB = random.choice(['qm9','qm9_2','qm9_3','qm9_4','qm9_6'])
-    BATCH_SIZE = random.choice([x for x in range(16,100,4)])
-    CYCLE = random.choice([1,2,4,6,8,12]) if DB != 'qm9' else random.choice([1,2,4,6])
-    TYPE_OF_IMAGE = random.choice(['A','B','C','D','E'])
-    SHUFFLE = random.choice(['full','none','partial','groups'])
-    MOMENTUM = round(random.uniform(0.8,0.9),3)
-    LEARNING_RATE = random.choice(['0.0003','0.001','0.0005','0.0008'])
+    BATCH_SIZE = random.choice([x for x in range(16,64,4)])
+    TYPE_OF_IMAGE = random.choice(['A','B','C','D','E','F','G','H'])
+    PATIENCE = random.choice([x for x in range(20,41,5)])
 
+
+    if DB == 'qm9_6':
+        CYCLE = random.choice([2,4,8,16])
+    elif DB == 'qm9_4':
+        CYCLE = random.choice([2,4,8])
+    elif DB == 'qm9_3':
+        CYCLE = random.choice([1,2,4,8])
+    elif DB == 'qm9_2':
+        CYCLE = random.choice([1,2,4])
+    elif DB == 'qm9':
+        CYCLE = random.choice([1,2])
+
+    SHUFFLE = random.choices(['full','none','partial','groups'], weights = [3,3,3,3])[0]
+    MOMENTUM = round(random.uniform(0.75,0.85),3)
+    LEARNING_RATE = round(random.uniform(0.0003,0.003),5)
+    MARGIN = random.choice(['avg','black'])
     if DB not in ['qm9','qm9_2']:
         MODEL = random.choice(['resnet18','resnet34','resnet50','vgg16_bn', 'vgg19_bn','densenet121','squeezenet1_0', 'squeezenet1_1'])
     else:
         MODEL = random.choice(['resnet18','resnet34','vgg16_bn', 'vgg19_bn','densenet121','squeezenet1_0', 'squeezenet1_1'])
 
-
-    RESIZE_BOOL = random.choices([0, 1], weights=[4, 1])[0]
-
-    if RESIZE_BOOL:
+    if RESIZE_BOOL := random.choices([0, 1], weights=[4, 1])[0]:
         RESIZE = random.choice([32,36,40,44,48])
         MATRIX_SIZE = 0
         RANDOM_OR = False
         
     else:
         MATRIX_SIZE = random.choice([32,36,40,44,48])
-        RANDOM_OR = random.choice([False, True])
-        MARGIN = random.choice(['avg','black'])
+        RANDOM_OR = random.choices([False, True], weights = [1,4])[0]
         RESIZE = 0
 
     return {'DB':DB,'BATCH_SIZE':BATCH_SIZE,'CYCLE':CYCLE,'TYPE_OF_IMAGE':TYPE_OF_IMAGE,'SHUFFLE':SHUFFLE,'MOMENTUM':MOMENTUM,
@@ -58,7 +67,7 @@ def get_random_params():
 # Przykład użycia:
 if __name__ == "__main__":
  
-   for _ in range(20):
+   for _ in range(40):
         os.chdir(PATH)
         modify_params(get_random_params())
         importlib.reload(params_module)
