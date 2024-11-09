@@ -10,6 +10,9 @@ import subprocess
 import os
 import random
 
+from models.conv import *
+from functools import partial #to ignore pretrained argument in fastai
+
 #this function perform database creation, .png files creation and DataLoader and Dataset PyTorch object creation. Moreover it is possible to create
 #a fastai workflow build on that components which we will show you in this demo.
 
@@ -63,7 +66,11 @@ def training_workflow():
                     get_x=get_x, get_y=get_y,
                     splitter=RandomSplitter(valid_pct=0.1, seed=42)).dataloaders(filtered, bs=BATCH_SIZE)
 
-    learn = vision_learner(dblock, eval(MODEL), metrics=mae, lr=LEARNING_RATE)
+    if MODEL in ['S1CNN()','S2CNN()']:
+        model = eval(MODEL)
+        learn = Learner(dblock, model, metrics=mae, lr=LEARNING_RATE)
+    else:
+        learn = vision_learner(dblock, eval(MODEL), metrics=mae, lr=LEARNING_RATE)
     saving_callbacks = SaveModelCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, fname=f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai')}")
     early_stopping_cb = EarlyStoppingCallback(monitor='valid_loss', comp=np.less, min_delta=DELTA, patience=PATIENCE)
 
