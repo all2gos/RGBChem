@@ -14,7 +14,7 @@ RGBChem is a novel approach for converting chemical compounds into image represe
 for leveraging machine learning (ML) in scenarios where the available dataset is too small to apply ML methods effectively.
 
 ## 🖥️ Software
-We use the ``![fastai](https://github.com/fastai/fastai)`` library to facilitate the deep learning training process. All other dependencies are fairly standard and have been listed in `requirements.txt`.
+We use the `fastai` ([link](https://github.com/fastai/fastai)) library to facilitate the deep learning training process. All other dependencies are fairly standard and have been listed in `requirements.txt`.
 
 ## Project structure
 
