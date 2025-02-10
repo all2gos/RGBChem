@@ -17,13 +17,13 @@ SHUFFLE = 'groups'
 #groups = similar to partial but every type of atom is a separate group
 
 #---IMAGE PARAMETERS---#
-MATRIX_SIZE = 40
+MATRIX_SIZE = 30
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
 TYPE_OF_IMAGE = 'D'
 RANDOM_OR = False
 SCALING = True
-DELETE = True #if True then the script will delete all so far generated files and created new one from scratch
+DELETE = False #if True then the script will delete all so far generated files and created new one from scratch
 MARGIN = 'black'
 RESIZE = 0
 STEP = 10 #calibration parameter
@@ -42,7 +42,7 @@ PATIENCE = 44
 DELTA = 0
 
 #---OTHERS---#
-BATTERY_LEVEL_CONTROL = True #if True then script checks the battery charge level after each epoch and wait some time  
+BATTERY_LEVEL_CONTROL = False #if True then script checks the battery charge level after each epoch and wait some time  
 MULTIPROCESS = True
 NUM_PROC=6
 #---LOGGING---#
