@@ -23,7 +23,7 @@ def training_workflow():
     create_qm_vanilla_file() #if qm_vanilla.csv not in directory then this function will create it
 
     from scripts.params import __all__
-    print(f"All params list")
+    print(f"\n---All params list---")
     for name in __all__:
         print(f"{name} = {globals()[name]}")
 

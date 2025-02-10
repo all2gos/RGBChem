@@ -282,7 +282,7 @@ def creating_images(start, end, bo, ds, STEP, split=0.1):
 
     train_files_count = len(os.listdir(os.path.join(PATH, TRAIN_DIR_NAME)))
     test_files_count = len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))
-    print(f'Creating images has been finished. There are {train_files_count} files in {TRAIN_DIR_NAME} directory and {test_files_count} in {TEST_DIR_NAME} directory.')
+    print(f'\nCreating images has been finished. There are {train_files_count} files in {TRAIN_DIR_NAME} directory and {test_files_count} in {TEST_DIR_NAME} directory.')
 def modify_params(changes):
     '''Function which modify params in scripts/params.py file
     Changes is a dictionary with new values of param e.g. {'CYCLE':4, 'DB':'qm9_2'}'''
