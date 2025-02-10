@@ -33,11 +33,15 @@ def get_list_of_files():
     '''Get the list of all .xyz file available, if data directory is empty then exctract information from .tar file'''
     try:
         files = os.listdir(f'{PATH}/data')
+
     except FileNotFoundError:
         os.system('mkdir data')
+        
+    files = os.listdir(f'{PATH}/data')
+    if len(files) == 0:
+        print('Extracting data from .tar file')
         os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
         files = os.listdir(f'{PATH}/data')
-
     return files
 
 r_range, g_range, b_range = (0,1),(0,1),(0,1)
