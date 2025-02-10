@@ -30,7 +30,7 @@ qm9_4_train = test_indices['qm9_4_train']
 qm9_6_train = test_indices['qm9_6_train']
 
 def get_list_of_files():
-    '''Get the list of all .xyz file available, if directory is empty then exctract information from .tar file'''
+    '''Get the list of all .xyz file available, if data directory is empty then exctract information from .tar file'''
     try:
         files = os.listdir(f'{PATH}/data')
     except FileNotFoundError:
@@ -275,11 +275,13 @@ def creating_images(start, end, bo, ds, STEP, split=0.1):
         for chem in range(start, end+1):
             print(f"\r{chem}/{end+1}",end='')
             process_image(chem, bo=bo, ds=ds, split=split)
-    print(f'Creating images have been finished. There are {len(os.listdir(f'{PATH}/{TRAIN_DIR_NAME}'))} files in {TRAIN_DIR_NAME} directory and {len(os.listdir(f'{PATH}/{TEST_DIR_NAME}'))} in {TEST_DIR_NAME} directory.')
 
+    train_files_count = len(os.listdir(os.path.join(PATH, TRAIN_DIR_NAME)))
+    test_files_count = len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))
+    print(f'Creating images has been finished. There are {train_files_count} files in {TRAIN_DIR_NAME} directory and {test_files_count} in {TEST_DIR_NAME} directory.')
 def modify_params(changes):
     '''Function which modify params in scripts/params.py file
-    Changes is a directory with new values of param e.g. {'CYCLE':4}'''
+    Changes is a dictionary with new values of param e.g. {'CYCLE':4, 'DB':'qm9_2'}'''
     with open('scripts/params.py', 'r') as file:
         content = file.read()
 
@@ -287,7 +289,6 @@ def modify_params(changes):
         if isinstance(value, str):
             value = f"'{value}'"
         content = re.sub(f'{param} = .*', f'{param} = {value}', content)
-
 
     with open('scripts/params.py', 'w') as file:
         file.write(content)
