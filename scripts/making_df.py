@@ -13,10 +13,8 @@ def extracting(f, shuffle = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
     with open(f, 'r') as file:
         lines = file.readlines()
-
     df_record = {'n_atoms': int(lines[0].strip()), 'atom_type': [], 'cords': [], 'mulliken': []}
     properties = lines[1].split("\t")
-
     labels = ['ID','A','B','C','Dipole moment','Isotropic Polarizability', 'Energy of HOMO',
              'Energy of LUMO','HOMO-LUMO Gap','Electronic spatial extent','Zero point vibrational energy',
              'Internal energy at 0K','Internal energy at 298K','Enthalphy at 298K',
@@ -33,7 +31,7 @@ def extracting(f, shuffle = SHUFFLE):
         mulliken.append(atom_record[-1])
     
     #ensuring that atoms are writen in .xyz in correct order
-    order_of_atoms = {'C': 0, 'O': 1, 'N': 2, 'F': 3, 'H': 4}
+    order_of_atoms = {'Ru':44, 'Pd':46, 'Pt':78, 'Ir':77 ,'C': 6, 'O': 8, 'N': 7, 'F': 9, 'H': 1, 'P':15,'S':16,'Cl':17,'B':5}
     indices = sorted(range(len(atom_type)), key=lambda i: order_of_atoms[atom_type[i]])
     atom_type= [atom_type[i] for i in indices]
     cords = [cords[i] for i in indices]
@@ -79,7 +77,7 @@ def extracting(f, shuffle = SHUFFLE):
 
     elif shuffle == 'groups':
         '''Shuffling every type of atom separately'''
-        atom_groups = {'C': [], 'O': [], 'N': [], 'F': [], 'H': []}
+        atom_groups = {'C': [], 'O': [], 'N': [], 'F': [], 'H': [], 'P':[], 'S':[], 'Cl':[], 'Ru':[], 'Pd':[], 'Pt':[], 'Ir':[], 'B':[]}
         
         for i, atom in enumerate(atom_type):
             atom_groups[atom].append((atom_type[i], cords[i], mulliken[i]))
@@ -102,6 +100,7 @@ def extracting(f, shuffle = SHUFFLE):
     df_record['atom_type'] = atom_type
     df_record['cords'] = cords
     df_record['mulliken'] = mulliken
+    df_record['smiles'] = lines[-2]
     return df_record
 
 
@@ -174,7 +173,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
         index = row.name
         return f"{id_parts[0]}_{id_num}_{index}"
 
-    df['ID'] = df.apply(transform_id, axis=1)
+    df['ID']= df.apply(transform_id, axis=1)
 
     #bandgap rename and transform date type
     df.rename(columns={'HOMO-LUMO Gap': 'bandgap'}, inplace=True)
