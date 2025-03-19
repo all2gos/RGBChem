@@ -93,66 +93,51 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
         r = distance(cords, n_atoms)
         r += ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
     
-        #b = (atomic_charge(atom_types, n_atoms))
         b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     elif image_type == 'B':
         r = distance(cords, n_atoms)
         r += ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
     
-        #b = (atomic_charge(atom_types, n_atoms))
         b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
 
     elif image_type == 'C':
         r = distance(cords, n_atoms)
-        #r += ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
     
-        #b = (atomic_charge(atom_types, n_atoms))
         b = (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     elif image_type == 'D':
         r = distance(cords, n_atoms)
-        #r += ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
     
         b = (atomic_charge(atom_types, n_atoms))
         b += (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     elif image_type == 'E':
-        #r = distance(cords, n_atoms)
         r = ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
     
         b = (atomic_charge(atom_types, n_atoms))
-        #b += (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     elif image_type == 'F':
         r = distance(cords, n_atoms)
         r += ionization(atom_types, n_atoms)
 
-        #g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g = coulomb_matrix(cords, n_atoms, atom_types, diagonal = True)
     
         b = (atomic_charge(atom_types, n_atoms))
-        #b += (bond_order(distance(cords, n_atoms), atom_types, bo))
 
     elif image_type == 'G':
         r = distance(cords, n_atoms)
-        #r += ionization(atom_types, n_atoms)
 
         g = mulliken(eval(ds.mulliken.iloc[row]), n_atoms)
         g += coulomb_matrix(cords, n_atoms, atom_types, diagonal = False)
@@ -172,7 +157,6 @@ def making_rgb_numerically(row, bo, ds, scaling=SCALING, verbose = False, image_
 
     if scaling:
         r,g,b = scale_rgb_values(r,g,b) 
-
 
     #pasting the matrix into larger black matrix in random way		
     if RANDOM_OR == True: 
@@ -208,6 +192,7 @@ def making_rgb(mat, id, label):
   pImg = Image.fromarray(img, mode='RGB')
 
   pImg.save(f"{PATH}/{label}/{id}.png")
+  print(f"\r {id} have been saved in {label} directory", end='')
 
 def process_image(chem, bo, ds, split):
 
@@ -218,6 +203,7 @@ def process_image(chem, bo, ds, split):
         test_set = qm8_val
     elif DB.split('_')[0] == 'qm9':
         test_set = qm9_val
+        
     else:
         test_set = []
 
@@ -230,17 +216,21 @@ def process_image(chem, bo, ds, split):
         train_set = qm9_4_train
     elif DB == 'qm9_6':
         train_set = qm9_6_train
+    elif DB.split('_')[0] == 'qm7':
+        train_set = [x for x in range(3993) if x not in test_set]
     else:
         train_set = qm9_train
 
+    #print(f"Sum of train and test {len(test_set+train_set)}")
+    #print(f"Number of unique compounds in db {len(list(set(test_set+train_set)))}")
+    
     if int(ds.ID.iloc[chem].split('_')[1]) in test_set:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TEST_DIR_NAME)
-        print(f"\r{chem} goes to test set", end='')
     elif int(ds.ID.iloc[chem].split('_')[1]) in train_set:
         making_rgb(making_rgb_numerically(chem, bo, ds), ds.ID.iloc[chem], label=TRAIN_DIR_NAME)
 
 def creating_images(start, end, bo, ds, STEP, split=0.1):
-    print(f'Creating {end-start+1} images for training model')
+    #print(f'Creating {end-start+1} images for training model')
     print(f'Rearranging train and test files')
     
     try:
