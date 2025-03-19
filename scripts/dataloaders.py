@@ -44,21 +44,31 @@ class CustomDataset(torch.utils.data.Dataset):
         self.transform = transform
         name = f'{DB}.csv'
         self.df = pd.read_csv(os.path.join(PATH, name))
-
+        self.files = os.listdir(os.path.join(PATH, TRAIN_DIR_NAME)) + os.listdir(os.path.join(PATH, TEST_DIR_NAME))
+        self.labels = {row['ID']: row[PREDICTED_VALUE] for _, row in self.df.iterrows()}
+        
     def __len__(self):
-        return len(self.df)
+        return len(self.files)#, len(self.df)
 
     def __getitem__(self, idx):
-        img_name = f"{self.df['ID'].iloc[idx]}.png"
+        #img_name = f"{self.df['ID'].iloc[idx]}.png"
+        img_name = f"{self.files[idx]}"
         try: 
-            image = Image.open(f'{TRAIN_DIR_NAME}/{img_name}').convert('RGB') 
+            image = Image.open(f'{PATH}/{TRAIN_DIR_NAME}/{img_name}').convert('RGB') 
 
         except FileNotFoundError:
-            image = Image.open(f'{TEST_DIR_NAME}/{img_name}').convert('RGB')
+            image = Image.open(f'{PATH}/{TEST_DIR_NAME}/{img_name}').convert('RGB')
 
         label = self.df[PREDICTED_VALUE].iloc[idx]
         label = torch.tensor(label, dtype=torch.float32)#.to(DEVICE)
 
+        img_id = img_name.split('.')[0]  
+        print(len(self.files), idx, img_id)
+
+        label = self.labels.get(img_id, -1)
+        label = torch.tensor(label, dtype=torch.float32)#.to(DEVICE)
+
+        
         if self.transform:
             image = self.transform(image)
 
@@ -72,7 +82,7 @@ def dataloader_conv(n = 0):
     else: 
         print(f'Program did not create new images because DELETE parameter is set to False')
 
-    train_transforms = transforms.Compose([transforms.Resize((32,32)), transforms.ToTensor()])
+    train_transforms = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()])
     train_dataset = CustomDataset(transform=train_transforms)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
