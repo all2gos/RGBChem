@@ -93,9 +93,9 @@ def training_workflow():
             time.sleep(info[1])
 
     if BATTERY_LEVEL_CONTROL:
-        learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
+        learn.fit(EPOCHS, cbs=[early_stopping_cb, saving_callbacks, WaitTimeCallback()]) 
     else:
-        learn.fine_tune(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
+        learn.fit(EPOCHS, cbs=[early_stopping_cb, saving_callbacks]) 
 #    learn.export(f"{PATH}/{LOG_FILE.replace('.log','checkpoint_fastai.pth')}")
 
     move_one_image_to_the_outside()
