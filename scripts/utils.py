@@ -55,10 +55,7 @@ def calibration(ds, STEP, bo):
     on the entered settings contain values in the range 0-255
 
     '''
-    
-    if 'qm7' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm7_vanilla.csv')
-    if 'qm8' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm8_vanilla.csv')
-    if 'qm9' == DB.split('_')[0]: ds = pd.read_csv(f'{PATH}/qm9_vanilla.csv')
+    ds = pd.read_csv(f'{PATH}/{DB}.csv')
     global r_range, g_range, b_range
     data = []
     start = random.randint(0,5) #to avoid too long execution
