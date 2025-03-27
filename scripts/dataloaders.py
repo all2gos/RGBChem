@@ -6,14 +6,13 @@ import torch
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 from PIL import Image
-from sklearn.model_selection import train_test_split
 
 from .reax_ff_data import bo
 from scripts.making_df import *
 from scripts.matrix_function import *
 from scripts.params import *
 from scripts.utils import making_rgb_numerically, creating_images
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, random_split
 
 
 def read_files():
@@ -78,7 +77,12 @@ def dataloader_conv(n = 0):
 
     trans = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()])
 
-    train_files, val_files = train_test_split(os.listdir(f"{PATH}/{TRAIN_DIR_NAME}"), test_size=1-TRAIN_VAL_SPLIT, random_state=42)
+    all_files = os.listdir(f"{PATH}/{TRAIN_DIR_NAME}")
+    train_size = int(len(all_files) * TRAIN_VAL_SPLIT)
+    val_size = len(all_files) - train_size
+
+    #train_files, val_files = train_test_split(os.listdir(f"{PATH}/{TRAIN_DIR_NAME}"), test_size=1-TRAIN_VAL_SPLIT, random_state=42)
+    train_files, val_files = random_split(all_files, [train_size, val_size])
 
     #create datasets (based on TRAIN_DIR_NAME)
     train_dataset = CustomDataset(transform=trans, data_dir=TRAIN_DIR_NAME, file_list=train_files)
