@@ -18,4 +18,7 @@ We use the `fastai` [library](https://github.com/fastai/fastai) to facilitate th
 
 ## Project structure
 
+<img src="rgbchem_scheme.png" alt="Concept" width="800">
+
+
 ## Cite us
