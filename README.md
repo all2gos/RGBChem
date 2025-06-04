@@ -25,29 +25,17 @@ We use the `fastai` [library](https://github.com/fastai/fastai) to facilitate th
 
 ```
 @article{Stottko2025,
-
   title = {RGBChem: Image-Like Representation of Chemical Compounds for Property Prediction},
-  
   volume = {21},
-  
   ISSN = {1549-9626},
-  
   url = {http://dx.doi.org/10.1021/acs.jctc.5c00291},
-  
   DOI = {10.1021/acs.jctc.5c00291},
-  
   number = {10},
-  
   journal = {Journal of Chemical Theory and Computation},
-  
   publisher = {American Chemical Society (ACS)},
-  
   author = {Stottko,  Rafał and Michalski,  Radosław and Szyja,  Bartłomiej M.},
-  
   year = {2025},
-  
   month = may,
-  
   pages = {5322–5333}
 }
 ```
