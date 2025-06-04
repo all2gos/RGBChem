@@ -23,7 +23,7 @@ We use the `fastai` [library](https://github.com/fastai/fastai) to facilitate th
 
 ## Cite us
 
-`
+```
 @article{Stottko2025,
 
   title = {RGBChem: Image-Like Representation of Chemical Compounds for Property Prediction},
@@ -50,4 +50,5 @@ We use the `fastai` [library](https://github.com/fastai/fastai) to facilitate th
   
   pages = {5322–5333}
 }
-`
+```
+
