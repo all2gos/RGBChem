@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
-
-
+from ase.data import atomic_numbers
 import sys,os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
+
+import logging
+from scripts.logging import setup_logging
+setup_logging()
 #matrices that take values not only on the diagonal
 
 #distance matrix
@@ -18,11 +21,13 @@ def distance(coordinates, n_atoms):
         for j in range(min_length):
             
             if i != j:
-                cord_i = np.array(np.char.replace(coordinates[i], '*^', 'e')).astype(float)
-                cord_j = np.array(np.char.replace(coordinates[j], '*^', 'e')).astype(float)
+                try:
+                    cord_i = np.array(np.char.replace(coordinates[i], '*^', 'e')).astype(float)
+                    cord_j = np.array(np.char.replace(coordinates[j], '*^', 'e')).astype(float)
+                except ValueError:
+                    logging.DEBUG(f"There is problem with {coordinates} set of values")
                 
                 dist_mat[i][j] = np.linalg.norm(cord_i - cord_j)
-
     return dist_mat
 
 def bond_order(mat, atom_type, bo):
@@ -47,7 +52,7 @@ def bond_order(mat, atom_type, bo):
 def coulomb_matrix(coordinates, n_atoms, atom_type, diagonal = True):
     
     c_mat = np.zeros((n_atoms, n_atoms))
-    Z = {'H':1, 'C':6, 'N': 7, 'O':8,'F':9}
+    Z = atomic_numbers
     min_len = min(n_atoms, len(coordinates))
 
     for i in range(n_atoms):
@@ -58,10 +63,7 @@ def coulomb_matrix(coordinates, n_atoms, atom_type, diagonal = True):
             else:
                 cord_i = np.array(np.char.replace(coordinates[i], '*^', 'e')).astype(float)
                 cord_j = np.array(np.char.replace(coordinates[j], '*^', 'e')).astype(float)
-                
                 c_mat[i][j] = Z[atom_type[i]]*Z[atom_type[j]] / np.linalg.norm(cord_i-cord_j)
-
-    
     return c_mat
 
 #matrices that take values only on the diagonal
@@ -78,7 +80,7 @@ def mulliken(m, n_atoms):
 def atomic_charge(atom_type, n_atoms):
     a_mat = np.zeros((n_atoms, n_atoms))
 
-    atom_dict = {'H':1, 'O':8, 'C':6, 'N':7, 'F':9}
+    atom_dict = atomic_numbers
     for i in range(n_atoms):
         a_mat[i][i] = atom_dict[atom_type[i]]
 
@@ -110,12 +112,14 @@ def electronaffinity(atom_type, n_atoms):
 def ionization(atom_type, n_atoms):
     a_mat = np.zeros((n_atoms, n_atoms))
     
-
-    atom_dict = {'H':13.598, 'O':13.618, 'C':11.261, 'N':14.534, 'F':17.422}
+    atom_dict = atomic_numbers
     for i in range(n_atoms):
-        a_mat[i][i] = atom_dict[atom_type[i]]
-
-
+        try:
+            a_mat[i][i] = atom_dict[atom_type[i]]
+        except KeyError:
+            logging.DEBUG(f"{atom_type[i]} is not present in dictionary, put 0 instead of appriopiate ionization energy")
+            
+            
     return a_mat
 
 
