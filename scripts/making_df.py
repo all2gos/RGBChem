@@ -8,6 +8,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts.params import *
 from scripts.utils import get_list_of_files
 
+import logging
+from scripts.logging import setup_logging
+setup_logging()
+
 
 def extracting(f, shuffle = SHUFFLE):
     ''' Extracts information from .xyz file into single dataframe row'''
@@ -180,7 +184,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
 
     df['bandgap'] = df['bandgap'].astype('float32')
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
-
+    df['Zero point vibrational energy'] *= 27211
     #optional filtering
     if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
     if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
