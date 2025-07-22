@@ -7,6 +7,10 @@ from torchvision.datasets import ImageFolder
 from torchvision import transforms
 from PIL import Image
 
+import logging
+from scripts.logging import setup_logging
+setup_logging()
+
 from .reax_ff_data import bo
 from scripts.making_df import *
 from scripts.matrix_function import *
@@ -67,7 +71,7 @@ class CustomDataset(torch.utils.data.Dataset):
 
         return image, label
      
-def dataloader_conv(n = 0):
+def dataloader_conv(n = 0, RESIZE=RESIZE):
     raw_data = read_files()
     if n ==0: n=len(raw_data) -1
     if DELETE == True: 
@@ -75,7 +79,10 @@ def dataloader_conv(n = 0):
     else: 
         print(f'Program did not create new images because DELETE parameter is set to False')
 
-    trans = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()])
+    if RESIZE != 0: 
+    	trans = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()]) 
+    else:
+        trans = transforms.Compose([transforms.ToTensor()])
 
     all_files = os.listdir(f"{PATH}/{TRAIN_DIR_NAME}")
     train_size = int(len(all_files) * TRAIN_VAL_SPLIT)
@@ -94,7 +101,7 @@ def dataloader_conv(n = 0):
 
     #test dataset (based on TEST_DIR_NAME)
     test_dataset = CustomDataset(transform=trans, data_dir=TEST_DIR_NAME)
-    test_loader = DataLoader(test_dataset, batch_size=int(len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))/CYCLE), shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=int(len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))/CYCLE*2), shuffle=False)
 
     return train_loader, val_loader, test_loader, raw_data
 
