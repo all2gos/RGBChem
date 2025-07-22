@@ -4,6 +4,7 @@ from scripts.params import *
 from scripts.params import *
 from scripts.qm_vanilla_handling import create_qm_vanilla_file
 import torch
+import torchvision.models as models
 import time
 import subprocess
 import os
@@ -13,6 +14,10 @@ import torch.nn as nn
 import numpy as np
 
 from models.conv import *
+
+import logging
+from scripts.logging import setup_logging
+setup_logging()
 
 def move_one_image_to_the_outside():
     '''Function that after training procedure choose one .png and move it to the external file'''
@@ -55,7 +60,20 @@ print(f'{len(filtered)} out of {len(ds)} samples were selected')
 #load model
 if MODEL in ['S1CNN()','S2CNN()']:
     model = eval(MODEL)
-
+elif MODEL in ['vgg19_bn','VGG19_BN','VGG19','vgg19']:
+    model = models.vgg19_bn(weights='IMAGENET1K_V1')
+    model.classifier = nn.Sequential(
+        *list(model.classifier.children())[:-1],  #changing last layer to one neuron
+        nn.Linear(4096, 1)  
+    )
+elif MODEL in ['VGG16','VGG16_BN','vgg16','vgg16_bn']:
+    model = models.vgg16_bn(weights='IMAGENET1K_V1')
+    model.classifier = nn.Sequential(
+        *list(model.classifier.children())[:-1],  #changing last layer to one neuron
+        nn.Linear(4096, 1)  
+    )
+else:
+    raise ValueError("Unknown model type")
 
 #gpu migration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -113,10 +131,11 @@ checkpoint_path = f"{PATH}/{LOG_FILE.replace('.log','checkpoint_pytorch.pth')}"
 
 #training loop
 for epoch in range(EPOCHS):
+    t = time.time()
     train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
     valid_loss, valid_mae, valid_var= validate(model, val_loader, criterion, device)
     
-    print(f"Epoch {epoch+1}/{EPOCHS} Train Loss: {train_loss:.4f}, Validation Loss: {valid_loss:.4f}, Validation MAE: {valid_mae:.4f} Pred/targets variance: {valid_var:.4f}")
+    print(f"Epoch {epoch+1}/{EPOCHS} Train Loss: {train_loss:.4f}, Validation Loss: {valid_loss:.4f}, Validation MAE: {valid_mae:.4f} Pred/targets variance: {valid_var:.4f} Time: {int(time.time()-t)}s")
     
     #early stopping
     if valid_loss < best_valid_loss - DELTA:
@@ -137,3 +156,4 @@ print(f'Final evaluation based on separate test set from {TEST_DIR_NAME} directo
 print(f"Number of test samples: {len(test_loader.dataset)}")
 test_loss, test_mae, test_var= validate(model, test_loader, criterion, device)
 print(f"Test MAE: {test_mae:.4f} Pred/targets variance: {test_var:.4f}")
+logging.info(f"Test MAE: {test_mae:.4f} Pred/targets variance: {test_var:.4f}")
