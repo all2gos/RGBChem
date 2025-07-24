@@ -1,14 +1,5 @@
 # 🟥🟩🟦 RGBChem
 
----------------------------------------------------------------------
- ██████╗   ██████╗  ██████╗   ██████╗  ██╗  ██╗ ███████╗ ███╗   ███╗
- ██╔══██╗ ██╔════╝  ██╔══██╗ ██╔════╝  ██║  ██║ ██╔════╝ ████╗ ████║
- ██████╔╝ ██║  ███╗ ██████╔╝ ██║       ███████║ █████╗   ██╔████╔██║
- ██╔══██╗ ██║   ██║ ██╔══██╗ ██║       ██╔══██║ ██╔══╝   ██║╚██╔╝██║
- ██║  ██║ ╚██████╔╝ ██████╔╝ ╚██████╗  ██║  ██║ ███████╗ ██║ ╚═╝ ██║
- ╚═╝  ╚═╝  ╚═════╝  ╚═════╝   ╚═════╝  ╚═╝  ╚═╝ ╚══════╝ ╚═╝     ╚═╝
----------------------------------------------------------------------
-
 RGBChem is a procedure for predicting the properties of chemical compounds using the conversion of chemical properties to RGB images.
 
 ## 🚀 Quickstart
@@ -17,7 +8,8 @@ The best way to begin is by exploring the `working_demo.ipynb` file, where we in
 ## How to run 
 
 The easiest way to proceed in your terminal is to run:
-```python run_learning.py
+```
+python run_learning.py
 
 ```
 The script should automatically read the training settings from the `scripts/params.py` file.
