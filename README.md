@@ -10,7 +10,6 @@ The best way to begin is by exploring the `working_demo.ipynb` file, where we in
 The easiest way to proceed in your terminal is to run:
 ```
 python run_learning.py
-
 ```
 The script should automatically read the training settings from the `scripts/params.py` file.
 
