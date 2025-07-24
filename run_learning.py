@@ -1,14 +1,10 @@
 import pandas as pd
 from scripts.dataloaders import dataloader_conv
 from scripts.params import *
-from scripts.params import *
 from scripts.qm_vanilla_handling import create_qm_vanilla_file
 import torch
 import torchvision.models as models
-import time
-import subprocess
-import os
-import random
+import random, os, time, subprocess
 import torch.optim as optim
 import torch.nn as nn
 import numpy as np
@@ -37,6 +33,16 @@ def get_list(path):
 
 def mae(y_true, y_pred):
     return np.mean(np.abs(y_true - y_pred))
+
+
+print('''
+ ██████╗   ██████╗  ██████╗   ██████╗  ██╗  ██╗ ███████╗ ███╗   ███╗
+ ██╔══██╗ ██╔════╝  ██╔══██╗ ██╔════╝  ██║  ██║ ██╔════╝ ████╗ ████║
+ ██████╔╝ ██║  ███╗ ██████╔╝ ██║       ███████║ █████╗   ██╔████╔██║
+ ██╔══██╗ ██║   ██║ ██╔══██╗ ██║       ██╔══██║ ██╔══╝   ██║╚██╔╝██║
+ ██║  ██║ ╚██████╔╝ ██████╔╝ ╚██████╗  ██║  ██║ ███████╗ ██║ ╚═╝ ██║
+ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝   ╚═════╝  ╚═╝  ╚═╝ ╚══════╝ ╚═╝     ╚═╝
+      ''')
 
 #load data points
 train_loader, val_loader, test_loader, raw_data = dataloader_conv()
@@ -76,8 +82,7 @@ else:
     raise ValueError("Unknown model type")
 
 #gpu migration
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+model.to(DEVICE)
 
 #optimizer and loss function
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -132,8 +137,8 @@ checkpoint_path = f"{PATH}/{LOG_FILE.replace('.log','checkpoint_pytorch.pth')}"
 #training loop
 for epoch in range(EPOCHS):
     t = time.time()
-    train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
-    valid_loss, valid_mae, valid_var= validate(model, val_loader, criterion, device)
+    train_loss = train_one_epoch(model, train_loader, optimizer, criterion, DEVICE)
+    valid_loss, valid_mae, valid_var= validate(model, val_loader, criterion, DEVICE)
     
     print(f"Epoch {epoch+1}/{EPOCHS} Train Loss: {train_loss:.4f}, Validation Loss: {valid_loss:.4f}, Validation MAE: {valid_mae:.4f} Pred/targets variance: {valid_var:.4f} Time: {int(time.time()-t)}s")
     
@@ -154,6 +159,6 @@ for epoch in range(EPOCHS):
 
 print(f'Final evaluation based on separate test set from {TEST_DIR_NAME} directory')
 print(f"Number of test samples: {len(test_loader.dataset)}")
-test_loss, test_mae, test_var= validate(model, test_loader, criterion, device)
+test_loss, test_mae, test_var= validate(model, test_loader, criterion, DEVICE)
 print(f"Test MAE: {test_mae:.4f} Pred/targets variance: {test_var:.4f}")
 logging.info(f"Test MAE: {test_mae:.4f} Pred/targets variance: {test_var:.4f}")
