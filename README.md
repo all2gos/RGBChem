@@ -1,10 +1,17 @@
 # 🟥🟩🟦 RGBChem
+
 RGBChem is a procedure for predicting the properties of chemical compounds using the conversion of chemical properties to RGB images.
 
 ## 🚀 Quickstart
 The best way to begin is by exploring the `working_demo.ipynb` file, where we introduce the workflow used to train the original models.
 
 ## How to run 
+
+The easiest way to proceed in your terminal is to run:
+```
+python run_learning.py
+```
+The script should automatically read the training settings from the `scripts/params.py` file.
 
 ## 🧠 Main concept
 
@@ -14,7 +21,7 @@ RGBChem is a novel approach for converting chemical compounds into image represe
 for leveraging machine learning (ML) in scenarios where the available dataset is too small to apply ML methods effectively.
 
 ## 🖥️ Software
-We use the `fastai` [library](https://github.com/fastai/fastai) to facilitate the deep learning training process. All other dependencies are fairly standard and have been listed in `requirements.txt`.
+We use the dependencies which are fairly standard and have been listed in `requirements.txt`. 
 
 ## Project structure
 
