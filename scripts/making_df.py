@@ -1,16 +1,15 @@
-import random
 import pandas as pd
-import os, sys
+import os, sys, random
 from scipy.special import factorial
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from scripts.params import *
 from scripts.utils import get_list_of_files
+from ase.data import atomic_numbers
 
 import logging
 from scripts.logging import setup_logging
+
 setup_logging()
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 def extracting(f, shuffle = SHUFFLE):
@@ -35,7 +34,7 @@ def extracting(f, shuffle = SHUFFLE):
         mulliken.append(atom_record[-1])
     
     #ensuring that atoms are writen in .xyz in correct order
-    order_of_atoms = {'Ru':44, 'Pd':46, 'Pt':78, 'Ir':77 ,'C': 6, 'O': 8, 'N': 7, 'F': 9, 'H': 1, 'P':15,'S':16,'Cl':17,'B':5}
+    order_of_atoms = atomic_numbers
     indices = sorted(range(len(atom_type)), key=lambda i: order_of_atoms[atom_type[i]])
     atom_type= [atom_type[i] for i in indices]
     cords = [cords[i] for i in indices]
@@ -151,7 +150,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     #df.columns = columns_
 
     #counting the atoms 
-    el = ['C', 'O', 'N', 'F', 'H']
+    el = [x for x in atomic_numbers][:84]
 
     def count_(l, element):
         return l.count(element)
@@ -159,7 +158,7 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     for atom in el:
         df[f'Number_of_{atom}'] = df.atom_type.apply(lambda x: count_(x, atom))
         
-    df['Sum_of_heavy_atoms'] = df['Number_of_C'] + df['Number_of_F'] + df['Number_of_N'] + df['Number_of_O']
+    df['Sum_of_heavy_atoms'] = df['n_atoms'] - df['Number_of_H']
 
 
     #possible comb column creation
@@ -185,9 +184,10 @@ def making_df(l:int=0, cycle:int=CYCLE) -> None:
     df['bandgap'] = df['bandgap'].astype('float32')
     df['bandgap_correct'] = df['bandgap'] - df['bandgap'].mean()
     df['Zero point vibrational energy'] *= 27211
+
     #optional filtering
-    if DB == 'qm7_demo' :df = df[df['Sum_of_heavy_atoms']<8]
-    if DB == 'qm8_demo' :df = df[df['Sum_of_heavy_atoms']<9] 
+    if DB == 'qm7_demo': df = df[df['Sum_of_heavy_atoms']<8]
+    if DB == 'qm8_demo': df = df[df['Sum_of_heavy_atoms']<9] 
 
     #final saving
     df.to_csv(os.path.join(PATH, f"{DB}.csv"))    
