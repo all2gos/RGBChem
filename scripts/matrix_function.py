@@ -124,3 +124,80 @@ def ionization(atom_type, n_atoms):
 
 
    
+# g2 according to behler-parrinello formulation 
+def g2(positions, center_index, second_atom, eta, rs, r_cut):
+    """
+    Computes the G2 symmetry function value for a selected atom with respect to its selected neighbor.
+
+    Parameters:
+        positions: ndarray (n_atoms, 3) - coordinates of all atoms
+        center_index: int - index of the central atom
+        eta: float - width parameter of the Gaussian
+        rs: float - center of the radial function
+        r_cut: float - cutoff radius
+
+    Returns:
+        float - G2 value for the specified atom
+    """
+
+    def fc(r, r_cut):
+        return 0.5 * np.cos(np.pi * r / r_cut) + 0.5 if r < r_cut else 0.0
+
+    center = positions[center_index]
+    second= positions[second_atom]
+
+    try:
+        second = np.array([float(x) for x in second])
+        center = np.array([float(x) for x in center])
+        r_ij = np.linalg.norm(second - center)
+        if r_ij < r_cut:
+            g2_value = np.exp(-eta * (r_ij - rs)**2) * fc(r_ij, r_cut)
+        else:
+            g2_value = 0.0
+    except ValueError:
+        try:
+            second = np.array(np.char.replace(positions[center_index], '*^', 'e')).astype(float)
+            center = np.array(np.char.replace(positions[second_atom], '*^', 'e')).astype(float)
+            r_ij = np.linalg.norm(second - center)
+            if r_ij < r_cut:
+                g2_value = np.exp(-eta * (r_ij - rs)**2) * fc(r_ij, r_cut)
+            else:
+                g2_value = 0.0
+        except Exception as e:
+            print(f"Error in computing G2 value: {e}")
+            #print(f'Bad value in coordinates, cannot compute G2 value, returning 0')
+            g2_value = 0.0
+    
+    return g2_value
+
+
+def g2_matrix(positions, eta, rs, r_cut):
+    """
+    Creates an n x n matrix, where n is the number of atoms, and the element at position (i, j) 
+    contains the radial G2 function computed for atom i with respect to atom j only.
+
+    Parameters:
+        positions: ndarray (n_atoms, 3) - coordinates of all atoms
+        eta: float - width parameter of the Gaussian
+        rs: float - center of the radial function
+        r_cut: float - cutoff radius
+
+    Returns:
+        ndarray (n_atoms, n_atoms) - matrix of G2 values
+    """
+
+    n_atoms = len(positions)
+    g2_matrix = np.zeros((n_atoms, n_atoms))
+
+    for i in range(n_atoms):
+        for j in range(n_atoms):
+            if i != j:
+                g2_matrix[i, j] = g2(positions, i, j, eta, rs, r_cut)
+
+    #if n_atoms == 46:
+    #    print(f"Example G2 matrix: {g2_matrix}")
+
+    return g2_matrix
+
+
+
