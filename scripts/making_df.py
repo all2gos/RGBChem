@@ -80,19 +80,22 @@ def extracting(f, shuffle = SHUFFLE):
 
     elif shuffle == 'groups':
         '''Shuffling every type of atom separately'''
-        atom_groups = {'C': [], 'O': [], 'N': [], 'F': [], 'H': [], 'P':[], 'S':[], 'Cl':[], 'Ru':[], 'Pd':[], 'Pt':[], 'Ir':[], 'B':[]}
+        atom_groups = {}
         
         for i, atom in enumerate(atom_type):
+            if atom not in atom_groups:
+                atom_groups[atom] = []
+
             atom_groups[atom].append((atom_type[i], cords[i], mulliken[i]))
         
-        for atom in atom_groups:
+        for atom in atom_groups.keys():
             random.shuffle(atom_groups[atom])
         
-        atom_type = []
-        cords = []
-        mulliken = []
+        atom_type, cords, mulliken = [], [], []
+
         
-        for atom in ['C', 'O', 'N', 'F', 'H']:
+        at_num_order = sorted(atom_groups.keys(), key=lambda x: atomic_numbers[x], reverse=True)
+        for atom in at_num_order:
             group = atom_groups[atom]
             for at, crd, mul in group:
                 atom_type.append(at)
