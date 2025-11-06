@@ -1,14 +1,14 @@
 import torch
 
-__all__ = ['BATCH_SIZE', 'CYCLE', 'DB', 'DEVICE', 'EPOCHS', 'LEARNING_RATE', 'LOG_FILE', 'MATRIX_SIZE', 'MOMENTUM', 'PATH', 'PREDICTED_VALUE', 'SHUFFLE', 'TEST_DIR_NAME','TRAIN_DIR_NAME', 'TRAIN_VAL_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR','MARGIN','RESIZE','STEP','BATTERY_LEVEL_CONTROL','MULTIPROCESS','NUM_PROC','DROPOUT', 'LOG_LEVEL']
+__all__ = ['BATCH_SIZE', 'CYCLE', 'DB', 'DEVICE', 'EPOCHS', 'LEARNING_RATE', 'LOG_FILE', 'MATRIX_SIZE', 'MOMENTUM', 'PATH', 'PREDICTED_VALUE', 'SHUFFLE', 'TEST_DIR_NAME','TRAIN_DIR_NAME', 'TRAIN_VAL_SPLIT', 'SCALING', 'DELETE','TYPE_OF_IMAGE', 'PATIENCE', 'DELTA','MODEL','RANDOM_OR','MARGIN','RESIZE','STEP','BATTERY_LEVEL_CONTROL','MULTIPROCESS','NUM_PROC','DROPOUT', 'WAIT_UNTIL','LOG_LEVEL']
 
 #--- OVERALL PARAMETERS---#
-PATH = '/home/rstottko/RGBChem' #your path to the working directory
-PREDICTED_VALUE = 'bandgap'
+PATH = '/home/rstottko/a_phd_workspace/RGBChem'
+PREDICTED_VALUE = 'HL_Gap'
 
 #---DATABASE PARAMETERS---#
-DB = 'tg'
-CYCLE =2
+DB = 'qm9_6'
+CYCLE = 1
 SHUFFLE = 'groups'
 #none = defined order of atoms
 #full = completely random order
@@ -16,37 +16,38 @@ SHUFFLE = 'groups'
 #groups = similar to partial but every type of atom is a separate group
 
 #---IMAGE PARAMETERS---#
-MATRIX_SIZE = 0 #if you want to use RESIZE technique set this value as 0
+MATRIX_SIZE = 0
 TRAIN_DIR_NAME = 'train'
 TEST_DIR_NAME = 'test'
-TYPE_OF_IMAGE = 'PC'
+TYPE_OF_IMAGE = 'A'
 RANDOM_OR = False
 SCALING = True
-DELETE = True #if True then the script will delete all so far generated files and created new one from scratch
-MARGIN = 'avg'
-RESIZE = 70 #set RESIZE to 0 when you do not want to use these technique
+DELETE = True
+MARGIN = 'resize'
+RESIZE = 74
 STEP = 100 #calibration parameter
 
 #---TRAINING PROCESS PARAMETERS---#
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL = 'S2CNN()'
 DROPOUT = 0.2 #only for SnCNN architecture type
-LEARNING_RATE = 0.00527
-MOMENTUM = 0.733
-EPOCHS = 2048
+LEARNING_RATE = 0.00245
+MOMENTUM = 0.778
+EPOCHS = 8
 TRAIN_VAL_SPLIT = 0.9
-BATCH_SIZE = 64
+BATCH_SIZE = 100
 
 #---EARLY STOPPING---#
-PATIENCE = 10
+PATIENCE = 2
 DELTA = 0
+WAIT_UNTIL = 10 #early stopping starts after this many epochs
 
 #---OTHERS---#
 BATTERY_LEVEL_CONTROL = False #if True then script checks the battery charge level after each epoch and wait some time  
 
 #---MULTIPROCESSING---#
 MULTIPROCESS = True
-NUM_PROC=6
+NUM_PROC=12
 
 #---LOGGING---#
 #name of the log file
