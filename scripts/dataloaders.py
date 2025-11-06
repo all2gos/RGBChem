@@ -22,23 +22,42 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 def read_files():
     '''Read the file, if file does not exist then exctract information from .tar file'''
 
-    print('reading files')
+    print('Reading files')
     db_file_exist = os.path.exists(f'{PATH}/{DB}.csv')
     data_dir_exist = os.path.exists(f"{PATH}/data")
 
     if data_dir_exist:
-        print(os.getcwd())
         shutil.rmtree(f"{PATH}/data") 
 
-    if not db_file_exist:
+    if not db_file_exist and 'qm' in DB:
 
         os.mkdir(f"{PATH}/data")
         images_exists = len(os.listdir(f"{PATH}/data"))>10
         if not images_exists:
-            os.system(f'tar -xvf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
+            print(f"Extracting data from dsgdb9nsd.xyz.tar.bz2")
+            os.system(f'tar -xf dsgdb9nsd.xyz.tar.bz2 -C {PATH}/data')
                 
         making_df()
+
+    elif not db_file_exist and 'omol' in DB:
+        whole_df = pd.read_csv(f"OMol25/omol_million.csv")
         
+        with open(f"{PATH}/OMol25/{DB}.txt", 'r') as f:
+            IDs = f.read().splitlines()
+        sub_df = whole_df[whole_df['ID'].isin(IDs)]
+        sub_df.to_csv(f"{PATH}/{DB}.csv", index=False)
+
+        print('Created new database from OMol25/omol_million.csv based on IDs in {DB}.txt')
+        print('Length of this database:', len(sub_df))
+        
+
+        print(f'Creating lots of copies in new database. According to the CYCLE (in this case: {CYCLE}) parameter')
+
+        from scripts.cycle_adjusting import cycle_adjusting_main
+        cycle_adjusting_main(DB=DB)
+
+
+
     files = pd.read_csv(f'{PATH}/{DB}.csv')
 
     return files
@@ -69,7 +88,7 @@ class CustomDataset(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, label
+        return image, label, img_id
      
 def dataloader_conv(n = 0, RESIZE=RESIZE):
     raw_data = read_files()
@@ -80,7 +99,7 @@ def dataloader_conv(n = 0, RESIZE=RESIZE):
         print(f'Program did not create new images because DELETE parameter is set to False')
 
     if RESIZE != 0: 
-    	trans = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()]) 
+        trans = transforms.Compose([transforms.Resize((RESIZE,RESIZE)), transforms.ToTensor()]) 
     else:
         trans = transforms.Compose([transforms.ToTensor()])
 
@@ -101,7 +120,8 @@ def dataloader_conv(n = 0, RESIZE=RESIZE):
 
     #test dataset (based on TEST_DIR_NAME)
     test_dataset = CustomDataset(transform=trans, data_dir=TEST_DIR_NAME)
-    test_loader = DataLoader(test_dataset, batch_size=int(len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))/CYCLE*2), shuffle=False)
+    #test_loader = DataLoader(test_dataset, batch_size=max(24,int(len(os.listdir(os.path.join(PATH, TEST_DIR_NAME)))/CYCLE*2)), shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     return train_loader, val_loader, test_loader, raw_data
 
